@@ -9,10 +9,10 @@
     </properties>
     <root id="root">
       <element id="directory" name="server">
-        <element id="archive" name="PLUGIN_NAME-server.jar">
+        <element id="archive" name="TeamCity.QueueManager-server.jar">
           <element id="module-output" name="server" />
         </element>
-        <element id="archive" name="PLUGIN_NAME-resources.jar">
+        <element id="archive" name="TeamCity.QueueManager-resources.jar">
           <element id="directory" name="buildServerResources">
             <element id="dir-copy" path="$PROJECT_DIR$/server/resources" />
           </element>

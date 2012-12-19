@@ -12,15 +12,12 @@
   <bean class="bean class fully qualified name"/>
   -->
 
+
   <bean class="jetbrains.buildServer.queueManager.settings.SettingsManagerImpl"/>
 
   <bean class="jetbrains.buildServer.queueManager.StartStopWaitPrecondition"/>
 
-  <bean id="buildQueuePauseButton" class="jetbrains.buildServer.queueManager.pages.BuildQueuePauseButton"
-        init-method="register">
-    <property name="placeId" value="ALL_PAGES_FOOTER"/>
-    <property name="pluginName" value="samplePlugin"/>
-  </bean>
+  <bean class="jetbrains.buildServer.queueManager.pages.QueueManagerPageExtension" init-method="register"/>
 
   <bean class="jetbrains.buildServer.queueManager.pages.QueueStateController"/>
 

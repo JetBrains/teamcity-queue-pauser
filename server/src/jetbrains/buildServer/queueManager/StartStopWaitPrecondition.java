@@ -18,8 +18,7 @@ package jetbrains.buildServer.queueManager;
 
 import com.intellij.openapi.diagnostic.Logger;
 import jetbrains.buildServer.BuildAgent;
-import jetbrains.buildServer.queueManager.settings.QueueManagerSettings;
-import jetbrains.buildServer.queueManager.settings.SettingsProvider;
+import jetbrains.buildServer.queueManager.settings.SettingsManager;
 import jetbrains.buildServer.serverSide.buildDistribution.*;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -34,17 +33,16 @@ public class StartStopWaitPrecondition implements StartBuildPrecondition {
   private static final Logger LOG = Logger.getInstance(StartStopWaitPrecondition.class.getName());
 
   @NotNull
-  private final SettingsProvider mySettingsProvider;
+  private final SettingsManager mySettingsManager;
 
-  public StartStopWaitPrecondition(@NotNull SettingsProvider settingsProvider) {
-    mySettingsProvider = settingsProvider;
+  public StartStopWaitPrecondition(@NotNull SettingsManager settingsManager) {
+    mySettingsManager = settingsManager;
   }
 
   @Nullable
   public WaitReason canStart(@NotNull QueuedBuildInfo queuedBuild, @NotNull Map<QueuedBuildInfo, BuildAgent> canBeStarted, @NotNull BuildDistributorInput buildDistributorInput, boolean emulationMode) {
     WaitReason result = null;
-    final QueueManagerSettings settings = mySettingsProvider.getSettings();
-    if (!settings.isQueueEnabled()) {
+    if (!mySettingsManager.getQueueState()) {
       result =  new SimpleWaitReason("Queue is disabled");
       if (LOG.isDebugEnabled()) {
         LOG.debug("Queue disabled. Returning wait reason");
