@@ -36,7 +36,6 @@
 
 <c:url var="actionUrl" value="/queueManager.html"/>
 
-
 <script type="text/javascript">
   BS.ChangeQueueStateDialog = OO.extend(BS.AbstractWebForm, OO.extend(BS.AbstractModalDialog, {
     formElement: function() {
@@ -75,11 +74,8 @@
     },
 
     submit: function() {
-
-      console.log('hello!1');
       BS.FormSaver.save(BS.ChangeQueueStateDialog, BS.ChangeQueueStateDialog.formElement().action, OO.extend(BS.SimpleListener, {
         onCompleteSave: function(form, responseXML, err) {
-          console.log('hello!2');
           BS.reload(true);
         }
         // todo: onFailure or onException
@@ -87,8 +83,6 @@
       return false;
     }
   }));
-
-
 
   <%----------------------------------------------------------%>
   $j(document).ready(function() {
