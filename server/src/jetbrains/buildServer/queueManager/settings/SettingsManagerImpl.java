@@ -7,6 +7,7 @@ import jetbrains.buildServer.web.openapi.PluginDescriptor;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Collections;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
@@ -21,6 +22,7 @@ public class SettingsManagerImpl implements SettingsManager {
   private interface FIELDS {
     public static final String QUEUE_STATE = "queue-state";
     public static final String SWITCHED_BY = "switched-by";
+    public static final String SWITCHED_ON = "switched-on";
   }
 
   private static final Map<String, String> DEFAULTS;
@@ -28,6 +30,7 @@ public class SettingsManagerImpl implements SettingsManager {
     final Map<String, String> defaults = new HashMap<String, String>();
     // queue is enabled by default
     defaults.put(FIELDS.QUEUE_STATE, Boolean.toString(Boolean.TRUE));
+    defaults.put(FIELDS.SWITCHED_ON, Long.toString(System.currentTimeMillis()));
     DEFAULTS = Collections.unmodifiableMap(defaults);
   }
 
@@ -85,6 +88,29 @@ public class SettingsManagerImpl implements SettingsManager {
     try {
       myLock.writeLock().lock();
       mySettingsMap.setValue(FIELDS.SWITCHED_BY, userName);
+    } finally {
+      myLock.writeLock().unlock();
+    }
+  }
+
+  @NotNull
+  public Date getQueueStateSwitchedOn() {
+    Date result;
+    try {
+      myLock.readLock().lock();
+      final String val = readValueWithDefault(FIELDS.SWITCHED_ON);
+      result = new Date(Long.parseLong(val));
+    } finally {
+      myLock.readLock().unlock();
+    }
+    return result;
+  }
+
+  @Override
+  public void setQueueStateSwitchedOn(@NotNull Date date) {
+    try {
+      myLock.writeLock().lock();
+      mySettingsMap.setValue(FIELDS.SWITCHED_ON, Long.toString(date.getTime()));
     } finally {
       myLock.writeLock().unlock();
     }

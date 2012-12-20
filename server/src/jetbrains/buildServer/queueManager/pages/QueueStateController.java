@@ -17,6 +17,9 @@ import org.springframework.web.servlet.view.RedirectView;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.Locale;
 
 import static jetbrains.buildServer.queueManager.PluginConstants.WEB.ERROR_QUEUE_IS_DISABLED;
 import static jetbrains.buildServer.queueManager.PluginConstants.WEB.PARAM_NEW_QUEUE_STATE;
@@ -27,6 +30,9 @@ import static jetbrains.buildServer.queueManager.PluginConstants.WEB.PARAM_NEW_Q
  * @author Oleg Rybak (oleg.rybak@jetbrains.com)
  */
 public class QueueStateController extends BaseActionController {
+
+  private static final String MESSAGE_FORMAT = "Build Queue is disabled by %s on %s";
+  private static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("dd MMM yyyy HH:mm:ss", Locale.ENGLISH);
 
   @NotNull
   private final SettingsManager mySettingsManager;
@@ -45,7 +51,7 @@ public class QueueStateController extends BaseActionController {
 
   private void init() {
     // process current queue state
-    processState(mySettingsManager.getQueueState(), mySettingsManager.getQueueStateSwitchedBy());
+    processState(mySettingsManager.getQueueState(), mySettingsManager.getQueueStateSwitchedBy(), mySettingsManager.getQueueStateSwitchedOn());
     // register controller for managing it
     registerAction(new ControllerAction() {
       public boolean canProcess(@NotNull final HttpServletRequest request) {
@@ -55,9 +61,11 @@ public class QueueStateController extends BaseActionController {
         boolean newQueueState = PropertiesUtil.getBoolean(request.getParameter(PARAM_NEW_QUEUE_STATE));
         final SUser user = SessionUser.getUser(request); // todo: can it be null?
         final String userName = user.getName();
-        processState(newQueueState, userName);
+        final Date date = new Date();
+        processState(newQueueState, userName, date);
         mySettingsManager.setQueueState(newQueueState);
         mySettingsManager.setQueueStateSwitchedBy(userName);
+        mySettingsManager.setQueueStateSwitchedOn(date);
       }
     });
   }
@@ -67,11 +75,12 @@ public class QueueStateController extends BaseActionController {
    * in critical error
    * @param state state of build queue
    */
-  private void processState(boolean state, String userName) {
+  private void processState(boolean state, String userName, Date date) {
     if (state) {
       myCriticalErrors.clearError(ERROR_QUEUE_IS_DISABLED);
     } else {
-      myCriticalErrors.putError(ERROR_QUEUE_IS_DISABLED, String.format("Build Queue is disabled by %s", userName));
+      myCriticalErrors.putError(ERROR_QUEUE_IS_DISABLED,
+              String.format(MESSAGE_FORMAT, userName, DATE_FORMAT.format(date)));
     }
   }
 

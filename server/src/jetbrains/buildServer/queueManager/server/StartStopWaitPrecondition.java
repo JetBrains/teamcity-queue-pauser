@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package jetbrains.buildServer.queueManager;
+package jetbrains.buildServer.queueManager.server;
 
 import com.intellij.openapi.diagnostic.Logger;
 import jetbrains.buildServer.BuildAgent;
