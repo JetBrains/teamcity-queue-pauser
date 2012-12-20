@@ -42,7 +42,7 @@ public class StartStopWaitPrecondition implements StartBuildPrecondition {
   @Nullable
   public WaitReason canStart(@NotNull QueuedBuildInfo queuedBuild, @NotNull Map<QueuedBuildInfo, BuildAgent> canBeStarted, @NotNull BuildDistributorInput buildDistributorInput, boolean emulationMode) {
     WaitReason result = null;
-    if (!mySettingsManager.getQueueState()) {
+    if (!mySettingsManager.isQueueEnabled()) {
       result =  new SimpleWaitReason("Queue is disabled");
       if (LOG.isDebugEnabled()) {
         LOG.debug("Queue disabled. Returning wait reason");

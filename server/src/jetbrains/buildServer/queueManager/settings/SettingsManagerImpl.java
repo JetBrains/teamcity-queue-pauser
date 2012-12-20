@@ -36,17 +36,19 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 public class SettingsManagerImpl implements SettingsManager {
 
   private interface FIELDS {
-    public static final String QUEUE_STATE = "queue-state";
-    public static final String SWITCHED_BY = "switched-by";
-    public static final String SWITCHED_ON = "switched-on";
+    public static final String QUEUE_ENABLED = "queue-enabled";
+    public static final String CHANGED_BY = "state-changed-by";
+    public static final String CHANGED_ON = "state-changed-on";
+    public static final String CHANGED_REASON = "state-changed-reason";
   }
 
   private static final Map<String, String> DEFAULTS;
   static {
     final Map<String, String> defaults = new HashMap<String, String>();
     // queue is enabled by default
-    defaults.put(FIELDS.QUEUE_STATE, Boolean.toString(Boolean.TRUE));
-    defaults.put(FIELDS.SWITCHED_ON, Long.toString(System.currentTimeMillis()));
+    defaults.put(FIELDS.QUEUE_ENABLED, Boolean.toString(Boolean.TRUE));
+    defaults.put(FIELDS.CHANGED_ON, Long.toString(System.currentTimeMillis()));
+    defaults.put(FIELDS.CHANGED_BY, Long.toString(0));
     DEFAULTS = Collections.unmodifiableMap(defaults);
   }
 
@@ -64,21 +66,16 @@ public class SettingsManagerImpl implements SettingsManager {
 
 
   @Override
-  public void setQueueState(boolean newQueueState) {
-    try {
-      myLock.writeLock().lock();
-      mySettingsMap.setValue(FIELDS.QUEUE_STATE, Boolean.toString(newQueueState));
-    } finally {
-      myLock.writeLock().unlock();
-    }
+  public void setQueueEnabled(boolean enabled) {
+    writeValue(FIELDS.QUEUE_ENABLED, Boolean.toString(enabled));
   }
 
   @Override
-  public boolean getQueueState() {
+  public boolean isQueueEnabled() {
     boolean result;
     try {
       myLock.readLock().lock();
-      final String val = readValueWithDefault(FIELDS.QUEUE_STATE);
+      final String val = readValueWithDefault(FIELDS.QUEUE_ENABLED);
       result =  Boolean.valueOf(val);
     } finally {
       myLock.readLock().unlock();
@@ -87,12 +84,12 @@ public class SettingsManagerImpl implements SettingsManager {
   }
 
   @Override
-  @NotNull
-  public String getQueueStateSwitchedBy() {
-    String result;
+  public long getQueueStateChangedBy() {
+    long result;
     try {
       myLock.readLock().lock();
-      result = readValueWithDefault(FIELDS.SWITCHED_BY);
+      final String val = readValueWithDefault(FIELDS.CHANGED_BY);
+      result = Long.parseLong(val);
     } finally {
       myLock.readLock().unlock();
     }
@@ -100,21 +97,16 @@ public class SettingsManagerImpl implements SettingsManager {
   }
 
   @Override
-  public void setQueueStateSwitchedBy(@NotNull String userName) {
-    try {
-      myLock.writeLock().lock();
-      mySettingsMap.setValue(FIELDS.SWITCHED_BY, userName);
-    } finally {
-      myLock.writeLock().unlock();
-    }
+  public void setQueueStateChangedBy(long userId) {
+      writeValue(FIELDS.CHANGED_BY, Long.toString(userId));
   }
 
   @NotNull
-  public Date getQueueStateSwitchedOn() {
+  public Date getQueueStateChangedOn() {
     Date result;
     try {
       myLock.readLock().lock();
-      final String val = readValueWithDefault(FIELDS.SWITCHED_ON);
+      final String val = readValueWithDefault(FIELDS.CHANGED_ON);
       result = new Date(Long.parseLong(val));
     } finally {
       myLock.readLock().unlock();
@@ -123,13 +115,27 @@ public class SettingsManagerImpl implements SettingsManager {
   }
 
   @Override
-  public void setQueueStateSwitchedOn(@NotNull Date date) {
+  public void setQueueStateChangedOn(@NotNull Date date) {
+      writeValue(FIELDS.CHANGED_ON, Long.toString(date.getTime()));
+  }
+
+
+  @NotNull
+  @Override
+  public String getQueueStateChangedReason() {
+    String result;
     try {
-      myLock.writeLock().lock();
-      mySettingsMap.setValue(FIELDS.SWITCHED_ON, Long.toString(date.getTime()));
+      myLock.readLock().lock();
+      result = readValueWithDefault(FIELDS.CHANGED_REASON);
     } finally {
-      myLock.writeLock().unlock();
+      myLock.readLock().unlock();
     }
+    return result;
+  }
+
+  @Override
+  public void setQueueStateChangedReason(@NotNull String reason) {
+    writeValue(FIELDS.CHANGED_REASON, reason);
   }
 
   /**
@@ -159,6 +165,20 @@ public class SettingsManagerImpl implements SettingsManager {
       }
     }
     return result;
+  }
+
+  /**
+   * Writes value to storage. Manages locks by itself
+   * @param key key to store value under
+   * @param value value to store
+   */
+  private void writeValue(String key, String value) {
+    try {
+      myLock.writeLock().lock();
+      mySettingsMap.setValue(key, value);
+    } finally {
+      myLock.writeLock().unlock();
+    }
   }
 
 

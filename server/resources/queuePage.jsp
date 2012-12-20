@@ -18,11 +18,15 @@
   ~ limitations under the License.
   --%>
 
-<jsp:useBean id="queueState" scope="request" type="java.lang.Boolean"/>
 <c:set var="PARAM_NEW_QUEUE_STATE" value="<%=PluginConstants.WEB.PARAM_NEW_QUEUE_STATE%>"/>
+<c:set var="PARAM_STATE_CHANGE_REASON" value="<%=PluginConstants.WEB.PARAM_STATE_CHANGE_REASON%>"/>
+
+
+<jsp:useBean id="queueState" scope="request" type="jetbrains.buildServer.queueManager.settings.QueueState"/>
+<c:set var="queueEnabled" value="${queueState.queueEnabled}"/>
 
 <c:choose>
-  <c:when test="${queueState}">
+  <c:when test="${queueEnabled}">
     <c:set var="switchQueueStateActionText" value="Disable Build Queue"/>
   </c:when>
   <c:otherwise>
@@ -30,12 +34,85 @@
   </c:otherwise>
 </c:choose>
 
-<c:set var="actionParams" value="${PARAM_NEW_QUEUE_STATE}=${not queueState}"/>
-<c:url var="actionUrl" value="/queueManager.html?${actionParams}"/>
+<c:url var="actionUrl" value="/queueManager.html"/>
+
 
 <script type="text/javascript">
+  BS.ChangeQueueStateDialog = OO.extend(BS.AbstractWebForm, OO.extend(BS.AbstractModalDialog, {
+    formElement: function() {
+      return $('changeQueueStateForm');
+    },
+
+    getContainer: function() {
+      return $('changeQueueStateFormDialog');
+    },
+
+    showDialog: function() {
+      this.formElement().${PARAM_STATE_CHANGE_REASON}.value = this.formElement().${PARAM_STATE_CHANGE_REASON}.defaultValue;
+      this.showCentered();
+      this.formElement().${PARAM_STATE_CHANGE_REASON}.focus();
+      this.formElement().${PARAM_STATE_CHANGE_REASON}.select();
+
+      var dialogTitle;
+      var dialogSubmitButtonTitle;
+      <c:choose>
+      <c:when test="${queueEnabled}">
+      dialogTitle = "Disable build queue";
+      dialogSubmitButtonTitle = "Disable";
+      </c:when>
+      <c:otherwise>
+      dialogTitle = "Enable build queue";
+      dialogSubmitButtonTitle = "Enable";
+      </c:otherwise>
+      </c:choose>
+
+      $j("#ChangeQueueStateSubmitButton").prop('value', dialogSubmitButtonTitle);
+      $j("#changeQueueStateFormTitle").html(dialogTitle);
+
+      this.bindCtrlEnterHandler(this.submit.bind(this));
+
+      return false;
+    },
+
+    submit: function() {
+
+      console.log('hello!1');
+      BS.FormSaver.save(BS.ChangeQueueStateDialog, BS.ChangeQueueStateDialog.formElement().action, OO.extend(BS.SimpleListener, {
+        onCompleteSave: function(form, responseXML, err) {
+          console.log('hello!2');
+          BS.reload(true);
+        }
+        // todo: onFailure or onException
+      }));
+      return false;
+    }
+  }));
+
+
+
+  <%----------------------------------------------------------%>
   $j(document).ready(function() {
-    $j('.quickLinks').append('<a class="quickLinksItem" href="${actionUrl}">${switchQueueStateActionText}</a>');
+    //$j('.quickLinks').append('<a class="quickLinksItem" href="${actionUrl}">${switchQueueStateActionText}</a>');
+    $j('.quickLinks').append('<a href="#" class="quickLinksItem" onclick="BS.ChangeQueueStateDialog.showDialog();">${switchQueueStateActionText}</a>');
   });
 </script>
+
+
+<bs:modalDialog formId="changeQueueStateForm"
+                title="Disable queue"
+                action="${actionUrl}"
+                closeCommand="BS.ChangeQueueStateDialog.close();"
+                saveCommand="BS.ChangeQueueStateDialog.submit()">
+  <label for="${PARAM_STATE_CHANGE_REASON}">Reason:</label>
+  <textarea id="${PARAM_STATE_CHANGE_REASON}"
+            name="${PARAM_STATE_CHANGE_REASON}"
+            rows="5" cols="46" class="commentTextArea"
+            onfocus="if (this.value == this.defaultValue) this.value = ''" onblur="if (this.value == '') this.value='&lt;your comment here&gt;'">&lt;your comment here&gt;</textarea>
+  <input type="hidden" name="${PARAM_NEW_QUEUE_STATE}" value="${not queueEnabled}">
+  <div class="popupSaveButtonsBlock">
+    <forms:cancel onclick="BS.ChangeQueueStateDialog.close()"/>
+    <forms:submit  label="Save" id="ChangeQueueStateSubmitButton"/>
+    <forms:saving/>
+  </div>
+</bs:modalDialog>
 

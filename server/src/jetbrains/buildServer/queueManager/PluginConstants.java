@@ -27,6 +27,8 @@ public final class PluginConstants {
 
     public static final String PARAM_NEW_QUEUE_STATE = "newQueueState";
 
+    public static final String PARAM_STATE_CHANGE_REASON = "stateChangeReason";
+
     public static final String PARAM_QUEUE_STATE = "queueState";
 
     @NonNls

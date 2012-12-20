@@ -17,7 +17,7 @@
 package jetbrains.buildServer.queueManager.pages;
 
 import jetbrains.buildServer.queueManager.PluginConstants;
-import jetbrains.buildServer.queueManager.settings.SettingsManager;
+import jetbrains.buildServer.queueManager.settings.QueueStateManager;
 import jetbrains.buildServer.serverSide.auth.SecurityContext;
 import jetbrains.buildServer.users.SUser;
 import jetbrains.buildServer.web.openapi.PagePlaces;
@@ -38,7 +38,7 @@ import java.util.Map;
 public class QueueManagerPageExtension extends SimplePageExtension {
 
   @NotNull
-  private final SettingsManager mySettingsManager;
+  private final QueueStateManager myQueueStateManager;
 
   @NotNull
   private final SecurityContext mySecurityContext;
@@ -46,11 +46,11 @@ public class QueueManagerPageExtension extends SimplePageExtension {
   public QueueManagerPageExtension(@NotNull PagePlaces pagePlaces,
                                    @NotNull PluginDescriptor descriptor,
                                    @NotNull SecurityContext securityContext,
-                                   @NotNull SettingsManager settingsManager
+                                   @NotNull QueueStateManager queueStateManager
   ) {
     super(pagePlaces);
     mySecurityContext = securityContext;
-    mySettingsManager = settingsManager;
+    myQueueStateManager = queueStateManager;
     setPlaceId(PlaceId.ALL_PAGES_FOOTER);
     setPluginName(descriptor.getPluginName());
     setIncludeUrl(descriptor.getPluginResourcesPath("queuePage.jsp"));
@@ -67,7 +67,7 @@ public class QueueManagerPageExtension extends SimplePageExtension {
   @Override
   public void fillModel(@NotNull Map<String, Object> model, @NotNull HttpServletRequest request) {
     super.fillModel(model, request);
-    model.put(PluginConstants.WEB.PARAM_QUEUE_STATE, mySettingsManager.getQueueState());
+    model.put(PluginConstants.WEB.PARAM_QUEUE_STATE, myQueueStateManager.readQueueState());
   }
 }
 
