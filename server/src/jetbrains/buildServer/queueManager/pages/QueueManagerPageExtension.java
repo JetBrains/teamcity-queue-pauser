@@ -53,7 +53,7 @@ public class QueueManagerPageExtension extends SimplePageExtension {
     mySettingsManager = settingsManager;
     setPlaceId(PlaceId.ALL_PAGES_FOOTER);
     setPluginName(descriptor.getPluginName());
-    setIncludeUrl(descriptor.getPluginResourcesPath("displayState.jsp"));
+    setIncludeUrl(descriptor.getPluginResourcesPath("queuePage.jsp"));
   }
 
   @Override
