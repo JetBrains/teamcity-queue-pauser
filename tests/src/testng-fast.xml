@@ -5,5 +5,12 @@
       <class name="SimpleTest"/>
     </classes>
   </test>
+
+  <test name="Settings Tests">
+    <classes>
+      <class name="jetbrains.buildServer.queueManager.settings.SettingsManagerImplTest"/>
+      <class name="jetbrains.buildServer.queueManager.settings.QueueStateManagerImplTest"/>
+    </classes>
+  </test>
 </suite>
 

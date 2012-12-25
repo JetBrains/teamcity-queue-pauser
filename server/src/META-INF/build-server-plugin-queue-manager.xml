@@ -23,7 +23,9 @@
 
   <bean class="jetbrains.buildServer.queueManager.pages.QueueStateDisplayPageExtension" init-method="register"/>
 
-  <bean class="jetbrains.buildServer.queueManager.pages.QueueStateController"/>
+  <bean class="jetbrains.buildServer.queueManager.server.QueueStateController"/>
+
+  <bean class="jetbrains.buildServer.queueManager.server.ChangeQueueStateAction"/>
 
 
 </beans>

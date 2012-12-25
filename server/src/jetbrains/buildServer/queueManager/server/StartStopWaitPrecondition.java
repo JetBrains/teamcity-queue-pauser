@@ -18,7 +18,8 @@ package jetbrains.buildServer.queueManager.server;
 
 import com.intellij.openapi.diagnostic.Logger;
 import jetbrains.buildServer.BuildAgent;
-import jetbrains.buildServer.queueManager.settings.SettingsManager;
+import jetbrains.buildServer.queueManager.settings.QueueState;
+import jetbrains.buildServer.queueManager.settings.QueueStateManager;
 import jetbrains.buildServer.serverSide.buildDistribution.*;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -33,19 +34,22 @@ public class StartStopWaitPrecondition implements StartBuildPrecondition {
   private static final Logger LOG = Logger.getInstance(StartStopWaitPrecondition.class.getName());
 
   @NotNull
-  private final SettingsManager mySettingsManager;
+  private final QueueStateManager myQueueStateManager;
 
-  public StartStopWaitPrecondition(@NotNull SettingsManager settingsManager) {
-    mySettingsManager = settingsManager;
+  public StartStopWaitPrecondition(@NotNull QueueStateManager queueStateManager) {
+    myQueueStateManager = queueStateManager;
   }
 
   @Nullable
-  public WaitReason canStart(@NotNull QueuedBuildInfo queuedBuild, @NotNull Map<QueuedBuildInfo, BuildAgent> canBeStarted, @NotNull BuildDistributorInput buildDistributorInput, boolean emulationMode) {
+  public WaitReason canStart(@NotNull QueuedBuildInfo queuedBuild,
+                             @NotNull Map<QueuedBuildInfo, BuildAgent> canBeStarted,
+                             @NotNull BuildDistributorInput buildDistributorInput, boolean emulationMode) {
     WaitReason result = null;
-    if (!mySettingsManager.isQueueEnabled()) {
-      result =  new SimpleWaitReason("Queue is disabled");
+    final QueueState queueState = myQueueStateManager.readQueueState();
+    if (!queueState.isQueueEnabled()) {
+      result =  new SimpleWaitReason("Queue is disabled"); // todo: pretty message in wait reason
       if (LOG.isDebugEnabled()) {
-        LOG.debug("Queue disabled. Returning wait reason");
+        LOG.debug("Queue disabled. Returning wait reason [" + result.getDescription() + "]");
       }
     }
     return result;

@@ -1,7 +1,3 @@
-<%@ page import="jetbrains.buildServer.queueManager.PluginConstants" %>
-<%@ include file="/include.jsp" %>
-<%@ page contentType="text/html;charset=UTF-8" language="java" %>
-
 <%--
   ~ Copyright 2000-2012 JetBrains s.r.o.
   ~
@@ -17,10 +13,13 @@
   ~ See the License for the specific language governing permissions and
   ~ limitations under the License.
   --%>
+<%@ include file="/include.jsp" %>
+<%@ page import="jetbrains.buildServer.queueManager.PluginConstants" %>
+<%@ page contentType="text/html;charset=UTF-8" language="java" %>
 
 <c:set var="PARAM_NEW_QUEUE_STATE" value="<%=PluginConstants.WEB.PARAM_NEW_QUEUE_STATE%>"/>
 <c:set var="PARAM_STATE_CHANGE_REASON" value="<%=PluginConstants.WEB.PARAM_STATE_CHANGE_REASON%>"/>
-
+<c:set var="QUEUE_MANAGER_URL" value="<%=PluginConstants.WEB.QUEUE_MANAGER_URL%>"/>
 
 <jsp:useBean id="queueState" scope="request" type="jetbrains.buildServer.queueManager.settings.QueueState"/>
 <c:set var="queueEnabled" value="${queueState.queueEnabled}"/>
@@ -34,7 +33,7 @@
   </c:otherwise>
 </c:choose>
 
-<c:url var="actionUrl" value="/queueManager.html"/>
+<c:url var="actionUrl" value="${QUEUE_MANAGER_URL}"/>
 
 <script type="text/javascript">
   BS.ChangeQueueStateDialog = OO.extend(BS.AbstractWebForm, OO.extend(BS.AbstractModalDialog, {
@@ -86,9 +85,9 @@
 
   <%----------------------------------------------------------%>
   $j(document).ready(function() {
-    //$j('.quickLinks').append('<a class="quickLinksItem" href="${actionUrl}">${switchQueueStateActionText}</a>');
     $j('.quickLinks').append('<a href="#" class="quickLinksItem" onclick="BS.ChangeQueueStateDialog.showDialog();">${switchQueueStateActionText}</a>');
   });
+  <%--------------%>
 </script>
 
 
@@ -100,8 +99,10 @@
   <label for="${PARAM_STATE_CHANGE_REASON}">Reason:</label>
   <textarea id="${PARAM_STATE_CHANGE_REASON}"
             name="${PARAM_STATE_CHANGE_REASON}"
-            rows="5" cols="46" class="commentTextArea"
-            onfocus="if (this.value == this.defaultValue) this.value = ''" onblur="if (this.value == '') this.value='&lt;your comment here&gt;'">&lt;your comment here&gt;</textarea>
+            rows="3" cols="46" class="commentTextArea"
+            onkeyup="if (this.value.length > 140) this.value = this.value.substring(0, 140)"
+            onfocus="if (this.value == this.defaultValue) this.value = ''"
+            onblur="if (this.value == '') this.value='&lt;your comment here&gt;'">&lt;your comment here&gt;</textarea>
   <input type="hidden" name="${PARAM_NEW_QUEUE_STATE}" value="${not queueEnabled}">
   <div class="popupSaveButtonsBlock">
     <forms:cancel onclick="BS.ChangeQueueStateDialog.close()"/>

@@ -19,6 +19,7 @@ package jetbrains.buildServer.queueManager.settings;
 import jetbrains.buildServer.serverSide.CustomSettings;
 import jetbrains.buildServer.serverSide.CustomSettingsManager;
 import jetbrains.buildServer.serverSide.SettingsMap;
+import jetbrains.buildServer.util.Dates;
 import jetbrains.buildServer.web.openapi.PluginDescriptor;
 import org.jetbrains.annotations.NotNull;
 
@@ -35,7 +36,7 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
  */
 public class SettingsManagerImpl implements SettingsManager {
 
-  private interface FIELDS {
+  interface FIELDS {
     public static final String QUEUE_ENABLED = "queue-enabled";
     public static final String CHANGED_BY = "state-changed-by";
     public static final String CHANGED_ON = "state-changed-on";
@@ -47,7 +48,7 @@ public class SettingsManagerImpl implements SettingsManager {
     final Map<String, String> defaults = new HashMap<String, String>();
     // queue is enabled by default
     defaults.put(FIELDS.QUEUE_ENABLED, Boolean.toString(Boolean.TRUE));
-    defaults.put(FIELDS.CHANGED_ON, Long.toString(System.currentTimeMillis()));
+    defaults.put(FIELDS.CHANGED_ON, Long.toString(Dates.makeDate(2012, 12, 12).getTime())); // 12.12.2012 0:0:0  for ease of testing
     defaults.put(FIELDS.CHANGED_BY, Long.toString(0));
     DEFAULTS = Collections.unmodifiableMap(defaults);
   }
