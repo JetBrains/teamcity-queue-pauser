@@ -18,6 +18,7 @@ package jetbrains.buildServer.queueManager.server;
 
 import jetbrains.buildServer.log.Loggers;
 import jetbrains.buildServer.queueManager.settings.QueueState;
+import jetbrains.buildServer.queueManager.settings.QueueStateImpl;
 import jetbrains.buildServer.queueManager.settings.QueueStateManager;
 import jetbrains.buildServer.users.SUser;
 import jetbrains.buildServer.util.Dates;
@@ -61,7 +62,7 @@ public final class ChangeQueueStateAction implements ControllerAction {
     final String comment = request.getParameter(PARAM_STATE_CHANGE_REASON);
     final SUser user = SessionUser.getUser(request);
     final Date date = new Date();
-    final QueueState state = new QueueState(newQueueState, user, comment, date);
+    final QueueState state = new QueueStateImpl(newQueueState, user, comment, date);
     myQueueStateManager.writeQueueState(state);
     processState(state, request);
   }
@@ -88,7 +89,7 @@ public final class ChangeQueueStateAction implements ControllerAction {
       builder.append(" by ").append(state.getUser().getDescriptiveName());
     }
     builder.append(" on ");
-    builder.append(Dates.formatDate(state.getTimestamp(), "dd'&nbsp;'MMM'&nbsp;'yy", SessionUser.getUserTimeZone(request)));
+    builder.append(Dates.formatDate(state.getTimestamp(), "dd MMM yyyy", SessionUser.getUserTimeZone(request)));
     builder.append(" with comment: ").append(state.getReason());
     return builder.toString();
   }

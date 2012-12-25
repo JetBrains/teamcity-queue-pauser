@@ -12,5 +12,11 @@
       <class name="jetbrains.buildServer.queueManager.settings.QueueStateManagerImplTest"/>
     </classes>
   </test>
+
+  <test name="Server Tests">
+    <classes>
+      <class name="jetbrains.buildServer.queueManager.server.StartStopWaitPreconditionTest"/>
+    </classes>
+  </test>
 </suite>
 

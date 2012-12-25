@@ -30,7 +30,7 @@ public class QueueStateManagerImpl implements QueueStateManager {
   public QueueState readQueueState() {
     try {
       myLock.readLock().lock();
-      return new QueueState(
+      return new QueueStateImpl(
               mySettingsManager.isQueueEnabled(),
               myUserModel.findUserById(mySettingsManager.getQueueStateChangedBy()),
               mySettingsManager.getQueueStateChangedReason(),

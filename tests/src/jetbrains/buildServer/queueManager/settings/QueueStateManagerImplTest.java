@@ -21,6 +21,7 @@ import jetbrains.buildServer.Mocked;
 import jetbrains.buildServer.users.SUser;
 import jetbrains.buildServer.users.UserModel;
 import jetbrains.buildServer.util.Dates;
+import jetbrains.buildServer.util.TestFor;
 import org.jmock.Expectations;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
@@ -32,6 +33,7 @@ import java.util.Date;
  *
  * @author Oleg Rybak (oleg.rybak@jetbrains.com)
  */
+@TestFor (testForClass = {QueueStateManager.class, QueueStateManagerImpl.class})
 public class QueueStateManagerImplTest extends BaseJMockTestCase {
 
   @Mocked
@@ -124,7 +126,7 @@ public class QueueStateManagerImplTest extends BaseJMockTestCase {
     final String newReason  = "Some new reason";
     final long userId = 12345L;
 
-    final QueueState stateToWrite = new QueueState(newQueueState, myUser, newReason, newDate);
+    final QueueState stateToWrite = new QueueStateImpl(newQueueState, myUser, newReason, newDate);
 
     m.checking(new Expectations() {{
       oneOf(mySettingsManager).setQueueEnabled(newQueueState);

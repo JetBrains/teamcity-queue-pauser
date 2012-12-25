@@ -47,7 +47,7 @@ public class StartStopWaitPrecondition implements StartBuildPrecondition {
     WaitReason result = null;
     final QueueState queueState = myQueueStateManager.readQueueState();
     if (!queueState.isQueueEnabled()) {
-      result =  new SimpleWaitReason("Queue is disabled"); // todo: pretty message in wait reason
+      result =  new SimpleWaitReason("Queue is disabled");
       if (LOG.isDebugEnabled()) {
         LOG.debug("Queue disabled. Returning wait reason [" + result.getDescription() + "]");
       }

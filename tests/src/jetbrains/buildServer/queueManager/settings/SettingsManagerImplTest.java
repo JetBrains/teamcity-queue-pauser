@@ -37,7 +37,7 @@ import java.util.Date;
  * @see SettingsManagerImpl
  * @author Oleg Rybak (oleg.rybak@jetbrains.com)
  */
-@TestFor (testForClass = SettingsManagerImpl.class)
+@TestFor (testForClass = {SettingsManager.class, SettingsManagerImpl.class})
 public class SettingsManagerImplTest extends BaseJMockTestCase {
 
   @Mocked
