@@ -39,7 +39,8 @@ public class QueueStateController extends BaseActionController {
   }
 
   @Override
-  protected ModelAndView doHandle(@NotNull final HttpServletRequest request, @NotNull final HttpServletResponse response) throws Exception {
+  protected ModelAndView doHandle(@NotNull final HttpServletRequest request,
+                                  @NotNull final HttpServletResponse response) throws Exception {
     doAction(request, response, null);
     return null;
   }

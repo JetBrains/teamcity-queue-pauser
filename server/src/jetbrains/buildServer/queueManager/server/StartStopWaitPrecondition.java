@@ -36,14 +36,14 @@ public class StartStopWaitPrecondition implements StartBuildPrecondition {
   @NotNull
   private final QueueStateManager myQueueStateManager;
 
-  public StartStopWaitPrecondition(@NotNull QueueStateManager queueStateManager) {
+  public StartStopWaitPrecondition(@NotNull final QueueStateManager queueStateManager) {
     myQueueStateManager = queueStateManager;
   }
 
   @Nullable
-  public WaitReason canStart(@NotNull QueuedBuildInfo queuedBuild,
-                             @NotNull Map<QueuedBuildInfo, BuildAgent> canBeStarted,
-                             @NotNull BuildDistributorInput buildDistributorInput, boolean emulationMode) {
+  public WaitReason canStart(@NotNull final QueuedBuildInfo queuedBuild,
+                             @NotNull final Map<QueuedBuildInfo, BuildAgent> canBeStarted,
+                             @NotNull final BuildDistributorInput buildDistributorInput, boolean emulationMode) {
     WaitReason result = null;
     final QueueState queueState = myQueueStateManager.readQueueState();
     if (!queueState.isQueueEnabled()) {

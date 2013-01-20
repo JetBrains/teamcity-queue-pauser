@@ -14,11 +14,16 @@ import javax.servlet.http.HttpServletRequest;
 import java.util.Map;
 
 /**
- * Created with IntelliJ IDEA.
+ * Class {@code QueueStateDisplayPageExtension}
+ *
+ * Implements page extension that displays current queue state
  *
  * @author Oleg Rybak (oleg.rybak@jetbrains.com)
  */
 public class QueueStateDisplayPageExtension extends SimplePageExtension {
+
+  @NotNull
+  private static final String EXTENSION_INCLUDE_URL = "queueStateDisplay.jsp";
 
   @NotNull
   private final QueueStateManager myQueueStateManager;
@@ -26,26 +31,26 @@ public class QueueStateDisplayPageExtension extends SimplePageExtension {
   @NotNull
   private final SecurityContext mySecurityContext;
 
-  public QueueStateDisplayPageExtension(@NotNull PagePlaces pagePlaces,
-                                        @NotNull PluginDescriptor descriptor,
-                                        @NotNull SecurityContext securityContext,
-                                        @NotNull QueueStateManager queueStateManager) {
+  public QueueStateDisplayPageExtension(@NotNull final PagePlaces pagePlaces,
+                                        @NotNull final PluginDescriptor descriptor,
+                                        @NotNull final SecurityContext securityContext,
+                                        @NotNull final QueueStateManager queueStateManager) {
     super(pagePlaces);
     myQueueStateManager = queueStateManager;
     mySecurityContext = securityContext;
     setPlaceId(PlaceId.BEFORE_CONTENT);
     setPluginName(descriptor.getPluginName());
-    setIncludeUrl(descriptor.getPluginResourcesPath("queueStateDisplay.jsp"));
+    setIncludeUrl(descriptor.getPluginResourcesPath(EXTENSION_INCLUDE_URL));
   }
 
   @Override
-  public boolean isAvailable(@NotNull HttpServletRequest request) {
+  public boolean isAvailable(@NotNull final HttpServletRequest request) {
     final SUser user = (SUser) mySecurityContext.getAuthorityHolder().getAssociatedUser();
     return user != null;
   }
 
   @Override
-  public void fillModel(@NotNull Map<String, Object> model, @NotNull HttpServletRequest request) {
+  public void fillModel(@NotNull final Map<String, Object> model, @NotNull final HttpServletRequest request) {
     super.fillModel(model, request);
     model.put(PluginConstants.WEB.PARAM_QUEUE_STATE, myQueueStateManager.readQueueState());
   }

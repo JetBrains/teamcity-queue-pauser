@@ -20,6 +20,7 @@ import jetbrains.buildServer.log.Loggers;
 import jetbrains.buildServer.queueManager.settings.QueueState;
 import jetbrains.buildServer.queueManager.settings.QueueStateImpl;
 import jetbrains.buildServer.queueManager.settings.QueueStateManager;
+import jetbrains.buildServer.serverSide.auth.SecurityContext;
 import jetbrains.buildServer.users.SUser;
 import jetbrains.buildServer.util.Dates;
 import jetbrains.buildServer.util.PropertiesUtil;
@@ -43,21 +44,30 @@ import static jetbrains.buildServer.queueManager.PluginConstants.WEB.PARAM_STATE
 */
 public final class ChangeQueueStateAction implements ControllerAction {
 
+  @NotNull
   private final QueueStateManager myQueueStateManager;
 
+  @NotNull
+  private final SecurityContext mySecurityContext;
+
   public ChangeQueueStateAction(@NotNull final QueueStateManager queueStateManager,
-                                @NotNull final QueueStateController queueStateController) {
+                                @NotNull final QueueStateController queueStateController,
+                                @NotNull final SecurityContext securityContext) {
     myQueueStateManager = queueStateManager;
+    mySecurityContext = securityContext;
     queueStateController.registerAction(this);
   }
 
-
   public boolean canProcess(@NotNull final HttpServletRequest request) {
-    return request.getParameter(PARAM_NEW_QUEUE_STATE) != null &&
-            request.getParameter(PARAM_STATE_CHANGE_REASON) != null;
+    final SUser user = (SUser) mySecurityContext.getAuthorityHolder().getAssociatedUser();
+    return  user != null
+            && user.isSystemAdministratorRoleGranted()
+            && request.getParameter(PARAM_NEW_QUEUE_STATE) != null
+            && request.getParameter(PARAM_STATE_CHANGE_REASON) != null;
   }
 
-  public void process(@NotNull final HttpServletRequest request, @NotNull final HttpServletResponse response, @Nullable final Element ajaxResponse) {
+  public void process(@NotNull final HttpServletRequest request,
+                      @NotNull final HttpServletResponse response, @Nullable final Element ajaxResponse) {
     boolean newQueueState = PropertiesUtil.getBoolean(request.getParameter(PARAM_NEW_QUEUE_STATE));
     final String comment = request.getParameter(PARAM_STATE_CHANGE_REASON);
     final SUser user = SessionUser.getUser(request);
@@ -73,7 +83,7 @@ public final class ChangeQueueStateAction implements ControllerAction {
    * @param request http request, that changed queue state
    */
   private void processState(@NotNull QueueState state, @NotNull HttpServletRequest request) {
-    Loggers.SERVER.warn(describeStateForSessionUser(state, request));
+    Loggers.SERVER.warn(describeState(state, request));
   }
 
   /**
@@ -82,7 +92,8 @@ public final class ChangeQueueStateAction implements ControllerAction {
    * @param request http request, that changed queue state
    * @return message with state change description
    */
-  private String describeStateForSessionUser(@NotNull QueueState state, @NotNull HttpServletRequest request) {
+  @NotNull
+  private String describeState(@NotNull QueueState state, @NotNull HttpServletRequest request) {
     final StringBuilder builder = new StringBuilder();
     builder.append("Queue was ").append(state.isQueueEnabled() ? "enabled" : "disabled");
     if (state.getUser() != null) {
