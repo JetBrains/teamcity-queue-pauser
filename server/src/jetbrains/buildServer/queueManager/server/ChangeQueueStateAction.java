@@ -38,10 +38,10 @@ import static jetbrains.buildServer.queueManager.PluginConstants.WEB.PARAM_NEW_Q
 import static jetbrains.buildServer.queueManager.PluginConstants.WEB.PARAM_STATE_CHANGE_REASON;
 
 /**
-* Created with IntelliJ IDEA.
-*
-* @author Oleg Rybak (oleg.rybak@jetbrains.com)
-*/
+ * Created with IntelliJ IDEA.
+ *
+ * @author Oleg Rybak (oleg.rybak@jetbrains.com)
+ */
 public final class ChangeQueueStateAction implements ControllerAction {
 
   @NotNull
@@ -95,13 +95,15 @@ public final class ChangeQueueStateAction implements ControllerAction {
   @NotNull
   private String describeState(@NotNull QueueState state, @NotNull HttpServletRequest request) {
     final StringBuilder builder = new StringBuilder();
-    builder.append("Queue was ").append(state.isQueueEnabled() ? "enabled" : "disabled");
+    builder.append("Queue was ").append(state.isQueueEnabled() ? "resumed" : "paused");
     if (state.getUser() != null) {
       builder.append(" by ").append(state.getUser().getDescriptiveName());
     }
     builder.append(" on ");
     builder.append(Dates.formatDate(state.getTimestamp(), "dd MMM yyyy", SessionUser.getUserTimeZone(request)));
-    builder.append(" with comment: ").append(state.getReason());
+    if (!"".equals(state.getReason())) {
+      builder.append(" with comment: ").append(state.getReason());
+    }
     return builder.toString();
   }
 }
