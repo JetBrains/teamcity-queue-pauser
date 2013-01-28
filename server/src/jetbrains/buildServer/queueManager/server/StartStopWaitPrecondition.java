@@ -27,6 +27,10 @@ import org.jetbrains.annotations.Nullable;
 import java.util.Map;
 
 /**
+ * Class {StartStopWaitPrecondition}.
+ *
+ * Prevents builds from starting if the queue was paused
+ *
  * @author Oleg Rybak (oleg.rybak@jetbrains.com)
  */
 public class StartStopWaitPrecondition implements StartBuildPrecondition {
@@ -47,9 +51,9 @@ public class StartStopWaitPrecondition implements StartBuildPrecondition {
     WaitReason result = null;
     final QueueState queueState = myQueueStateManager.readQueueState();
     if (!queueState.isQueueEnabled()) {
-      result =  new SimpleWaitReason("Queue is disabled");
+      result =  new SimpleWaitReason("Build queue was paused");
       if (LOG.isDebugEnabled()) {
-        LOG.debug("Queue disabled. Returning wait reason [" + result.getDescription() + "]");
+        LOG.debug("Build queue was paused. Returning wait reason [" + result.getDescription() + "]");
       }
     }
     return result;
