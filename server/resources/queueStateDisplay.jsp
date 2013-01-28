@@ -7,28 +7,28 @@
 <c:choose>
   <c:when test="${visible}">
     <c:set var="action">
-      Queue was ${queueState.queueEnabled ? "enabled" : "disabled"}
+      Build queue was paused
     </c:set>
     <c:set var="actor">
       <c:choose>
         <c:when test="${user != null}">
-          &nbsp;by <strong><c:out value="${user.descriptiveName}"/></strong>
+          &nbsp;by <strong><c:out value="${user.descriptiveName}"/></strong>&nbsp;
         </c:when>
         <c:otherwise/>
       </c:choose>
     </c:set>
     <c:set var="date">
-      &nbsp;<bs:date value="${queueState.timestamp}" smart="true"/>
+      <bs:date value="${queueState.timestamp}" smart="true"/>
     </c:set>
     <c:set var="reason">
       <c:choose>
         <c:when test="${not empty queueState.reason}">
           &nbsp;with comment: <c:out value="${queueState.reason}"/>
         </c:when>
-        <c:otherwise> </c:otherwise>
+        <c:otherwise/>
       </c:choose>
     </c:set>
-    <div class="attentionComment">${action}${actor}${date}${reason}</div>
+    <div class="attentionComment">${action}${actor}${date}${reason}. No builds will be started until queue is activated.</div>
   </c:when>
 </c:choose>
 

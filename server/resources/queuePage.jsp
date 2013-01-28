@@ -73,6 +73,12 @@
     },
 
     submit: function() {
+      var val = this.formElement().${PARAM_STATE_CHANGE_REASON}.value;
+      var defaultVal = this.formElement().${PARAM_STATE_CHANGE_REASON}.defaultValue;
+      if (val === defaultVal) {
+        val = '';
+      }
+      this.formElement().${PARAM_STATE_CHANGE_REASON}.value = val;
       BS.FormSaver.save(BS.ChangeQueueStateDialog, BS.ChangeQueueStateDialog.formElement().action, OO.extend(BS.SimpleListener, {
         onCompleteSave: function(form, responseXML, err) {
           BS.reload(true);
