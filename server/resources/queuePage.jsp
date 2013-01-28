@@ -22,14 +22,14 @@
 <c:set var="QUEUE_MANAGER_URL" value="<%=PluginConstants.WEB.QUEUE_MANAGER_URL%>"/>
 
 <jsp:useBean id="queueState" scope="request" type="jetbrains.buildServer.queueManager.settings.QueueState"/>
-<c:set var="queueEnabled" value="${queueState.queueEnabled}"/>
+<c:set var="queueIsActive" value="${queueState.queueEnabled}"/>
 
 <c:choose>
-  <c:when test="${queueEnabled}">
-    <c:set var="switchQueueStateActionText" value="Disable Build Queue"/>
+  <c:when test="${queueIsActive}">
+    <c:set var="switchQueueStateActionText" value="Pause Build Queue"/>
   </c:when>
   <c:otherwise>
-    <c:set var="switchQueueStateActionText" value="Enable Build Queue"/>
+    <c:set var="switchQueueStateActionText" value="Resume Build Queue"/>
   </c:otherwise>
 </c:choose>
 
@@ -54,13 +54,13 @@
       var dialogTitle;
       var dialogSubmitButtonTitle;
       <c:choose>
-      <c:when test="${queueEnabled}">
-      dialogTitle = "Disable build queue";
-      dialogSubmitButtonTitle = "Disable";
+      <c:when test="${queueIsActive}">
+      dialogTitle = "Pause build queue";
+      dialogSubmitButtonTitle = "Pause";
       </c:when>
       <c:otherwise>
-      dialogTitle = "Enable build queue";
-      dialogSubmitButtonTitle = "Enable";
+      dialogTitle = "Resume build queue";
+      dialogSubmitButtonTitle = "Resume";
       </c:otherwise>
       </c:choose>
 
@@ -103,7 +103,7 @@
             onkeyup="if (this.value.length > 140) this.value = this.value.substring(0, 140)"
             onfocus="if (this.value == this.defaultValue) this.value = ''"
             onblur="if (this.value == '') this.value='&lt;your comment here&gt;'">&lt;your comment here&gt;</textarea>
-  <input type="hidden" name="${PARAM_NEW_QUEUE_STATE}" value="${not queueEnabled}">
+  <input type="hidden" name="${PARAM_NEW_QUEUE_STATE}" value="${not queueIsActive}">
   <div class="popupSaveButtonsBlock">
     <forms:cancel onclick="BS.ChangeQueueStateDialog.close()"/>
     <forms:submit  label="Save" id="ChangeQueueStateSubmitButton"/>
