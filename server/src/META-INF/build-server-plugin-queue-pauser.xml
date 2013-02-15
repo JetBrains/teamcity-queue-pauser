@@ -11,7 +11,7 @@
 
   <bean class="jetbrains.buildServer.queueManager.server.StartStopWaitPrecondition"/>
 
-  <bean class="jetbrains.buildServer.queueManager.pages.QueueManagerPageExtension" init-method="register"/>
+  <bean class="jetbrains.buildServer.queueManager.pages.QueueStateChangePageExtension" init-method="register"/>
 
   <bean class="jetbrains.buildServer.queueManager.pages.QueueStateDisplayPageExtension" init-method="register"/>
 

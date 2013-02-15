@@ -31,13 +31,13 @@ import javax.servlet.http.HttpServletRequest;
 import java.util.Map;
 
 /**
- * Class {@code QueueManagerPageExtension}
+ * Class {@code QueueStateChangePageExtension}
  *
  * Implements page extension that allows to change queue state
  *
  * @author Oleg Rybak (oleg.rybak@jetbrains.com)
  */
-public class QueueManagerPageExtension extends SimplePageExtension {
+public class QueueStateChangePageExtension extends SimplePageExtension {
 
   @NotNull
   private static final String EXTENSION_INCLUDE_URL = "queuePage.jsp";
@@ -51,10 +51,10 @@ public class QueueManagerPageExtension extends SimplePageExtension {
   @NotNull
   private final SecurityContext mySecurityContext;
 
-  public QueueManagerPageExtension(@NotNull final PagePlaces pagePlaces,
-                                   @NotNull final PluginDescriptor descriptor,
-                                   @NotNull final SecurityContext securityContext,
-                                   @NotNull final QueueStateManager queueStateManager) {
+  public QueueStateChangePageExtension(@NotNull final PagePlaces pagePlaces,
+                                       @NotNull final PluginDescriptor descriptor,
+                                       @NotNull final SecurityContext securityContext,
+                                       @NotNull final QueueStateManager queueStateManager) {
     super(pagePlaces);
     mySecurityContext = securityContext;
     myQueueStateManager = queueStateManager;
