@@ -41,17 +41,23 @@ public class QueueStateDisplayPageExtension extends SimplePageExtension {
     setPlaceId(PlaceId.BEFORE_CONTENT);
     setPluginName(descriptor.getPluginName());
     setIncludeUrl(descriptor.getPluginResourcesPath(EXTENSION_INCLUDE_URL));
+    addJsFile(descriptor.getPluginResourcesPath("/js/QueueStateActions.js"));
   }
 
   @Override
   public boolean isAvailable(@NotNull final HttpServletRequest request) {
-    final SUser user = (SUser) mySecurityContext.getAuthorityHolder().getAssociatedUser();
-    return user != null;
+    return getUser() != null;
   }
 
   @Override
   public void fillModel(@NotNull final Map<String, Object> model, @NotNull final HttpServletRequest request) {
     super.fillModel(model, request);
     model.put(PluginConstants.WEB.PARAM_QUEUE_STATE, myQueueStateManager.readQueueState());
+    final SUser user = getUser();
+    model.put(PluginConstants.WEB.PARAM_CAN_MANAGE, user != null && user.isSystemAdministratorRoleGranted());
+  }
+
+  private SUser getUser() {
+    return (SUser) mySecurityContext.getAuthorityHolder().getAssociatedUser();
   }
 }

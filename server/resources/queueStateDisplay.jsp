@@ -1,8 +1,10 @@
 <%@ include file="/include.jsp" %>
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <jsp:useBean id="queueState" scope="request" type="jetbrains.buildServer.queueManager.settings.QueueState"/>
+<jsp:useBean id="canManage" scope="request" type="java.lang.Boolean"/>
 <c:set var="visible" value="${not queueState.queueEnabled}"/>
 <c:set var="user" value="${queueState.user}"/>
+<c:set var="canManage" value="${canManage}"/>
 
 <c:choose>
   <c:when test="${visible}">
@@ -28,8 +30,14 @@
         <c:otherwise/>
       </c:choose>
     </c:set>
-    <div class="attentionComment">${action}${actor}${date}${reason}. No builds will be started until queue is activated.</div>
+    <div class="attentionComment">
+        ${action}${actor}${date}${reason}. No builds will be started until queue is activated.
+      <c:if test="${canManage}">
+        <div style="float:right">
+          <a class="btn btn_mini" href="#" onclick="BS.QueueStateActions.resumeQueue(); return false">Resume</a>
+        </div>
+      </c:if>
+    </div>
   </c:when>
 </c:choose>
 
-  

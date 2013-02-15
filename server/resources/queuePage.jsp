@@ -19,7 +19,7 @@
 
 <c:set var="PARAM_NEW_QUEUE_STATE" value="<%=PluginConstants.WEB.PARAM_NEW_QUEUE_STATE%>"/>
 <c:set var="PARAM_STATE_CHANGE_REASON" value="<%=PluginConstants.WEB.PARAM_STATE_CHANGE_REASON%>"/>
-<c:set var="QUEUE_MANAGER_URL" value="<%=PluginConstants.WEB.QUEUE_MANAGER_URL%>"/>
+<c:set var="QUEUE_ACTIONS_URL" value="<%=PluginConstants.WEB.QUEUE_ACTIONS_URL%>"/>
 
 <jsp:useBean id="queueState" scope="request" type="jetbrains.buildServer.queueManager.settings.QueueState"/>
 <c:set var="queueIsActive" value="${queueState.queueEnabled}"/>
@@ -33,7 +33,7 @@
   </c:otherwise>
 </c:choose>
 
-<c:url var="actionUrl" value="${QUEUE_MANAGER_URL}"/>
+<c:url var="actionUrl" value="${QUEUE_ACTIONS_URL}"/>
 
 <script type="text/javascript">
   BS.ChangeQueueStateDialog = OO.extend(BS.AbstractWebForm, OO.extend(BS.AbstractModalDialog, {

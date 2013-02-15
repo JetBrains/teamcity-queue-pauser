@@ -59,7 +59,7 @@ public final class ChangeQueueStateAction implements ControllerAction {
   }
 
   public boolean canProcess(@NotNull final HttpServletRequest request) {
-    final SUser user = (SUser) mySecurityContext.getAuthorityHolder().getAssociatedUser();
+    final SUser user = getUser();
     return  user != null
             && user.isSystemAdministratorRoleGranted()
             && request.getParameter(PARAM_NEW_QUEUE_STATE) != null
@@ -70,11 +70,20 @@ public final class ChangeQueueStateAction implements ControllerAction {
                       @NotNull final HttpServletResponse response, @Nullable final Element ajaxResponse) {
     boolean newQueueState = PropertiesUtil.getBoolean(request.getParameter(PARAM_NEW_QUEUE_STATE));
     final String comment = request.getParameter(PARAM_STATE_CHANGE_REASON);
-    final SUser user = SessionUser.getUser(request);
+    final SUser user = getUser();
     final Date date = new Date();
     final QueueState state = new QueueStateImpl(newQueueState, user, comment, date);
     myQueueStateManager.writeQueueState(state);
     processState(state, request);
+  }
+
+  /**
+   * Gets current user from security context
+   * @return current user
+   */
+  @Nullable
+  private SUser getUser() {
+    return (SUser) mySecurityContext.getAuthorityHolder().getAssociatedUser();
   }
 
   /**

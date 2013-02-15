@@ -24,7 +24,7 @@ import org.springframework.web.servlet.ModelAndView;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import static jetbrains.buildServer.queueManager.PluginConstants.WEB.QUEUE_MANAGER_URL;
+import static jetbrains.buildServer.queueManager.PluginConstants.WEB.QUEUE_ACTIONS_URL;
 
 /**
  * Created with IntelliJ IDEA.
@@ -35,7 +35,7 @@ public class QueueStateController extends BaseActionController {
 
   public QueueStateController(@NotNull final WebControllerManager manager) {
     super(manager);
-    manager.registerController(QUEUE_MANAGER_URL, this);
+    manager.registerController(QUEUE_ACTIONS_URL, this);
   }
 
   @Override
