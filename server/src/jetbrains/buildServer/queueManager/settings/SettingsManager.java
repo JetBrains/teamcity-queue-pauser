@@ -17,6 +17,7 @@
 package jetbrains.buildServer.queueManager.settings;
 
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.Date;
 
@@ -31,9 +32,10 @@ public interface SettingsManager {
 
   public void setQueueEnabled(boolean enabled);
 
-  public long getQueueStateChangedBy();
+  @Nullable
+  public Long getQueueStateChangedBy();
 
-  public void setQueueStateChangedBy(long userId);
+  public void setQueueStateChangedBy(@NotNull final Long userId);
 
   @NotNull
   public Date getQueueStateChangedOn();
@@ -44,6 +46,5 @@ public interface SettingsManager {
   public String getQueueStateChangedReason();
 
   public void setQueueStateChangedReason(@NotNull String reason);
-
 
 }

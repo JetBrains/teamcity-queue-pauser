@@ -20,7 +20,7 @@ public class QueueStateManagerImpl implements QueueStateManager {
 
   private final ReentrantReadWriteLock myLock = new ReentrantReadWriteLock(true);
 
-  public QueueStateManagerImpl(@NotNull SettingsManager settingsManager, @NotNull UserModel userModel) {
+  public QueueStateManagerImpl(@NotNull final SettingsManager settingsManager, @NotNull final UserModel userModel) {
     mySettingsManager = settingsManager;
     myUserModel = userModel;
   }
@@ -30,9 +30,10 @@ public class QueueStateManagerImpl implements QueueStateManager {
   public QueueState readQueueState() {
     try {
       myLock.readLock().lock();
+      final Long userId = mySettingsManager.getQueueStateChangedBy();
       return new QueueStateImpl(
               mySettingsManager.isQueueEnabled(),
-              myUserModel.findUserById(mySettingsManager.getQueueStateChangedBy()),
+              userId != null ? myUserModel.findUserById(userId) : null,
               mySettingsManager.getQueueStateChangedReason(),
               mySettingsManager.getQueueStateChangedOn()
       );
@@ -42,7 +43,7 @@ public class QueueStateManagerImpl implements QueueStateManager {
   }
 
   @Override
-  public void writeQueueState(@NotNull QueueState queueState) {
+  public void writeQueueState(@NotNull final QueueState queueState) {
     try {
       myLock.writeLock().lock();
       mySettingsManager.setQueueEnabled(queueState.isQueueEnabled());

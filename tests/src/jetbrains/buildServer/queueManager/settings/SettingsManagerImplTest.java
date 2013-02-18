@@ -111,28 +111,28 @@ public class SettingsManagerImplTest extends BaseJMockTestCase {
       oneOf(mySettingsMap).getValue(SettingsManagerImpl.FIELDS.CHANGED_BY);
       will(returnValue(null));
 
-      oneOf(mySettingsMap).setValue(SettingsManagerImpl.FIELDS.CHANGED_BY, "0");
+      oneOf(mySettingsMap).setValue(SettingsManagerImpl.FIELDS.CHANGED_BY, "");
     }});
 
-    long l = mySettingsManager.getQueueStateChangedBy();
-    assertEquals(0, l);
+    final Long l = mySettingsManager.getQueueStateChangedBy();
+    assertNull(l);
   }
 
   @Test
   public void testGetQueueStateChangedBy() throws Exception {
-    final long val = 12345L;
+    final Long val = 12345L;
     m.checking(new Expectations() {{
       oneOf(mySettingsMap).getValue(SettingsManagerImpl.FIELDS.CHANGED_BY);
       will(returnValue(Long.toString(val)));
     }});
 
-    long l = mySettingsManager.getQueueStateChangedBy();
+    final Long l = mySettingsManager.getQueueStateChangedBy();
     assertEquals(val, l);
   }
 
   @Test
   public void testSetQueueStateChangedBy() throws Exception {
-    final long newVal = 54321;
+    final Long newVal = 54321L;
     m.checking(new Expectations() {{
       oneOf(mySettingsMap).setValue(SettingsManagerImpl.FIELDS.CHANGED_BY, Long.toString(newVal));
     }});
@@ -211,27 +211,4 @@ public class SettingsManagerImplTest extends BaseJMockTestCase {
 
     mySettingsManager.setQueueStateChangedReason(newValue);
   }
-
-
-
-  /*
-
-    @Test
-  public void testSetQueueStateChangedBy() throws Exception {
-    m.checking(new Expectations() {{
-
-    }});
-
-    m.assertIsSatisfied();
-
-  }
-
-
-  */
-
-
-
-
-
-
 }

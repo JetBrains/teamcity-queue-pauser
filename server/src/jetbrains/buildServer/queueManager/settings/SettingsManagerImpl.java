@@ -22,6 +22,7 @@ import jetbrains.buildServer.serverSide.SettingsMap;
 import jetbrains.buildServer.util.Dates;
 import jetbrains.buildServer.web.openapi.PluginDescriptor;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.Collections;
 import java.util.Date;
@@ -49,7 +50,6 @@ public class SettingsManagerImpl implements SettingsManager {
     // queue is enabled by default
     defaults.put(FIELDS.QUEUE_ENABLED, Boolean.toString(Boolean.TRUE));
     defaults.put(FIELDS.CHANGED_ON, Long.toString(Dates.makeDate(2012, 12, 12).getTime())); // 12.12.2012 0:0:0  for ease of testing
-    defaults.put(FIELDS.CHANGED_BY, Long.toString(0));
     DEFAULTS = Collections.unmodifiableMap(defaults);
   }
 
@@ -84,13 +84,16 @@ public class SettingsManagerImpl implements SettingsManager {
     return result;
   }
 
+  @Nullable
   @Override
-  public long getQueueStateChangedBy() {
-    long result;
+  public Long getQueueStateChangedBy() {
+    Long result = null;
     try {
       myLock.readLock().lock();
       final String val = readValueWithDefault(FIELDS.CHANGED_BY);
-      result = Long.parseLong(val);
+      if (!"".equals(val)) {
+        result = Long.parseLong(val);
+      }
     } finally {
       myLock.readLock().unlock();
     }
@@ -98,7 +101,7 @@ public class SettingsManagerImpl implements SettingsManager {
   }
 
   @Override
-  public void setQueueStateChangedBy(long userId) {
+  public void setQueueStateChangedBy(@NotNull final Long userId) {
       writeValue(FIELDS.CHANGED_BY, Long.toString(userId));
   }
 
@@ -181,6 +184,4 @@ public class SettingsManagerImpl implements SettingsManager {
       myLock.writeLock().unlock();
     }
   }
-
-
 }

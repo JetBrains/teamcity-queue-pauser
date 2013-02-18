@@ -20,7 +20,5 @@ public interface QueueStateManager {
    * Writes queue state to storage
    * @param queueState queue state
    */
-  public void writeQueueState(@NotNull QueueState queueState);
-
-
+  public void writeQueueState(@NotNull final QueueState queueState);
 }
