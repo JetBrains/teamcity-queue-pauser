@@ -23,7 +23,7 @@ public final class PluginConstants {
 
   public interface WEB {
 
-    public static final String QUEUE_ACTIONS_URL = "/queuePauser.html";
+    public static final String QUEUE_ACTIONS_URL = "/queueStartStop.html";
 
     public static final String PARAM_NEW_QUEUE_STATE = "newQueueState";
 

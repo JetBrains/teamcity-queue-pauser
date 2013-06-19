@@ -2,7 +2,7 @@
  * Contains action for quick queue resume
  */
 BS.QueueStateActions = {
-  url: window['base_uri'] + "/queuePauser.html",
+  url: window['base_uri'] + "/queueStartStop.html",
   resumeQueue: function() {
     var params = {
       'newQueueState': 'true',
