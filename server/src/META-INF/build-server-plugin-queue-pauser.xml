@@ -13,11 +13,10 @@
 
   <bean class="jetbrains.buildServer.queueManager.pages.QueueStateChangePageExtension" init-method="register"/>
 
-  <bean class="jetbrains.buildServer.queueManager.pages.QueueStateDisplayPageExtension" init-method="register"/>
-
   <bean class="jetbrains.buildServer.queueManager.server.QueueStateController"/>
 
   <bean class="jetbrains.buildServer.queueManager.server.ChangeQueueStateAction"/>
 
+  <bean class="jetbrains.buildServer.queueManager.server.QueueStateHealthReport"/>
 
 </beans>
