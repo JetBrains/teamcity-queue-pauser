@@ -59,12 +59,11 @@ public class SettingsManagerImpl implements SettingsManager {
 
   private final SettingsMap mySettingsMap;
 
-  public SettingsManagerImpl(@NotNull PluginDescriptor pluginDescriptor,
-                             @NotNull CustomSettingsManager customSettingsManager) {
+  public SettingsManagerImpl(@NotNull final PluginDescriptor pluginDescriptor,
+                             @NotNull final CustomSettingsManager customSettingsManager) {
     final CustomSettings settings = customSettingsManager.getCustomSettings(pluginDescriptor);
     mySettingsMap = settings.getGlobalSettings();
   }
-
 
   @Override
   public void setQueueEnabled(boolean enabled) {
@@ -91,7 +90,7 @@ public class SettingsManagerImpl implements SettingsManager {
     try {
       myLock.readLock().lock();
       final String val = readValueWithDefault(FIELDS.CHANGED_BY);
-      if (!"".equals(val)) {
+      if (!DEFAULT_VALUE.equals(val)) {
         result = Long.parseLong(val);
       }
     } finally {
@@ -101,8 +100,8 @@ public class SettingsManagerImpl implements SettingsManager {
   }
 
   @Override
-  public void setQueueStateChangedBy(@NotNull final Long userId) {
-      writeValue(FIELDS.CHANGED_BY, Long.toString(userId));
+  public void setQueueStateChangedBy(@Nullable final Long userId) {
+      writeValue(FIELDS.CHANGED_BY, userId != null ? Long.toString(userId) : DEFAULT_VALUE);
   }
 
   @NotNull
@@ -119,7 +118,7 @@ public class SettingsManagerImpl implements SettingsManager {
   }
 
   @Override
-  public void setQueueStateChangedOn(@NotNull Date date) {
+  public void setQueueStateChangedOn(@NotNull final Date date) {
       writeValue(FIELDS.CHANGED_ON, Long.toString(date.getTime()));
   }
 
@@ -138,7 +137,7 @@ public class SettingsManagerImpl implements SettingsManager {
   }
 
   @Override
-  public void setQueueStateChangedReason(@NotNull String reason) {
+  public void setQueueStateChangedReason(@NotNull final String reason) {
     writeValue(FIELDS.CHANGED_REASON, reason);
   }
 
@@ -152,7 +151,7 @@ public class SettingsManagerImpl implements SettingsManager {
    * If default value is absent, returns {@code empty string}.
    */
   @NotNull
-  private String readValueWithDefault(String key) {
+  private String readValueWithDefault(@NotNull final String key) {
     String result = mySettingsMap.getValue(key);
     if (result == null) {
       try {
@@ -176,7 +175,7 @@ public class SettingsManagerImpl implements SettingsManager {
    * @param key key to store value under
    * @param value value to store
    */
-  private void writeValue(String key, String value) {
+  private void writeValue(@NotNull final String key, @NotNull final String value) {
     try {
       myLock.writeLock().lock();
       mySettingsMap.setValue(key, value);

@@ -135,9 +135,27 @@ public class QueueStateManagerImplTest extends BaseJMockTestCase {
       will(returnValue(userId));
 
       oneOf(mySettingsManager).setQueueStateChangedBy(userId);
-
       oneOf(mySettingsManager).setQueueStateChangedReason(newReason);
+      oneOf(mySettingsManager).setQueueStateChangedOn(newDate);
+    }});
 
+    myQueueStateManager.writeQueueState(stateToWrite);
+  }
+
+  @Test
+  @TestFor (issues = "TW-10787")
+  public void testWriteQueueState_NullUser() throws Exception {
+    final boolean newQueueState = true;
+    final Date newDate = Dates.yesterday();
+    final String newReason = "Some new reason";
+    final SUser user = null;
+
+    final QueueState  stateToWrite = new QueueStateImpl(newQueueState, user, newReason, newDate);
+
+    m.checking(new Expectations() {{
+      oneOf(mySettingsManager).setQueueEnabled(newQueueState);
+      oneOf(mySettingsManager).setQueueStateChangedBy(null);
+      oneOf(mySettingsManager).setQueueStateChangedReason(newReason);
       oneOf(mySettingsManager).setQueueStateChangedOn(newDate);
     }});
 

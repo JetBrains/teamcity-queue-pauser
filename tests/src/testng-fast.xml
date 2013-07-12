@@ -16,6 +16,7 @@
   <test name="Server Tests">
     <classes>
       <class name="jetbrains.buildServer.queueManager.server.StartStopWaitPreconditionTest"/>
+      <class name="jetbrains.buildServer.queueManager.server.FreeSpaceQueuePauserTest"/>
     </classes>
   </test>
 </suite>

@@ -140,6 +140,19 @@ public class SettingsManagerImplTest extends BaseJMockTestCase {
     mySettingsManager.setQueueStateChangedBy(newVal);
   }
 
+  /**
+   * Support for automatic queue pausing (no user involved)
+   * @throws Exception if something goes wrong
+   */
+  @Test
+  @TestFor (issues = "TW-10787")
+  public void testSetQueueStateChangedBy_Null() throws Exception {
+    m.checking(new Expectations() {{
+      oneOf(mySettingsMap).setValue(SettingsManagerImpl.FIELDS.CHANGED_BY, "");
+    }});
+    mySettingsManager.setQueueStateChangedBy(null);
+  }
+
   @Test
   public void testGetQueueStateChangedOn_Default() throws Exception {
     final long customTime = Dates.makeDate(2012, 12, 12).getTime();

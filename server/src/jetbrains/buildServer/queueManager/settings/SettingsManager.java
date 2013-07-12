@@ -28,23 +28,23 @@ import java.util.Date;
  */
 public interface SettingsManager {
 
-  public boolean isQueueEnabled();
+  boolean isQueueEnabled();
 
-  public void setQueueEnabled(boolean enabled);
+  void setQueueEnabled(boolean enabled);
 
   @Nullable
-  public Long getQueueStateChangedBy();
+  Long getQueueStateChangedBy();
 
-  public void setQueueStateChangedBy(@NotNull final Long userId);
-
-  @NotNull
-  public Date getQueueStateChangedOn();
-
-  public void setQueueStateChangedOn(@NotNull Date date);
+  void setQueueStateChangedBy(@Nullable final Long userId);
 
   @NotNull
-  public String getQueueStateChangedReason();
+  Date getQueueStateChangedOn();
 
-  public void setQueueStateChangedReason(@NotNull String reason);
+  void setQueueStateChangedOn(@NotNull Date date);
+
+  @NotNull
+  String getQueueStateChangedReason();
+
+  void setQueueStateChangedReason(@NotNull String reason);
 
 }

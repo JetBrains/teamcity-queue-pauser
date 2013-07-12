@@ -19,4 +19,6 @@
 
   <bean class="jetbrains.buildServer.queueManager.server.QueueStateHealthReport"/>
 
+  <bean class="jetbrains.buildServer.queueManager.server.FreeSpaceQueuePauser"/>
+
 </beans>
