@@ -20,6 +20,7 @@ import jetbrains.buildServer.log.Loggers;
 import jetbrains.buildServer.queueManager.settings.QueueState;
 import jetbrains.buildServer.queueManager.settings.QueueStateImpl;
 import jetbrains.buildServer.queueManager.settings.QueueStateManager;
+import jetbrains.buildServer.serverSide.auth.Permission;
 import jetbrains.buildServer.serverSide.auth.SecurityContext;
 import jetbrains.buildServer.users.SUser;
 import jetbrains.buildServer.util.Dates;
@@ -61,7 +62,7 @@ public final class ChangeQueueStateAction implements ControllerAction {
   public boolean canProcess(@NotNull final HttpServletRequest request) {
     final SUser user = getUser();
     return  user != null
-            && user.isSystemAdministratorRoleGranted()
+            && user.isPermissionGrantedGlobally(Permission.ENABLE_DISABLE_AGENT)
             && request.getParameter(PARAM_NEW_QUEUE_STATE) != null
             && request.getParameter(PARAM_STATE_CHANGE_REASON) != null;
   }

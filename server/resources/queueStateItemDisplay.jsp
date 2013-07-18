@@ -1,7 +1,3 @@
-<%@ page import="jetbrains.buildServer.serverSide.auth.AuthorityHolder" %>
-<%@ page import="jetbrains.buildServer.users.SUser" %>
-<%@ page import="jetbrains.buildServer.web.util.SessionUser" %>
-
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ include file="/include-internal.jsp" %>
 
@@ -32,16 +28,11 @@
 </c:set>
 <div>
   ${action}${actor}${date}${reason}. No builds will be started until queue is activated.
-<%
-  AuthorityHolder currentUser = SessionUser.getUser(request);
-  if (((SUser)currentUser).isSystemAdministratorRoleGranted()) {
-%>
-<div style="float:right">
-  <a class="btn btn_mini" href="#" onclick="BS.QueueStateActions.resumeQueue(); return false">Resume</a>
-</div>
-<%
-  }
-%>
+  <authz:authorize allPermissions="ENABLE_DISABLE_AGENT">
+    <div style="float:right">
+      <a class="btn btn_mini" href="#" onclick="BS.QueueStateActions.resumeQueue(); return false">Resume</a>
+    </div>
+  </authz:authorize>
 </div>
 
 
