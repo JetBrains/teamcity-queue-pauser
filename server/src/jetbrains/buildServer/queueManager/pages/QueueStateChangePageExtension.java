@@ -18,6 +18,7 @@ package jetbrains.buildServer.queueManager.pages;
 
 import jetbrains.buildServer.queueManager.PluginConstants;
 import jetbrains.buildServer.queueManager.settings.QueueStateManager;
+import jetbrains.buildServer.serverSide.auth.Permission;
 import jetbrains.buildServer.serverSide.auth.SecurityContext;
 import jetbrains.buildServer.users.SUser;
 import jetbrains.buildServer.web.openapi.PagePlaces;
@@ -68,7 +69,7 @@ public class QueueStateChangePageExtension extends SimplePageExtension {
     final SUser user = (SUser) mySecurityContext.getAuthorityHolder().getAssociatedUser();
     return WebUtil.getPathWithoutAuthenticationType(request).startsWith(EXTENSION_AVAILABILITY_URL)
             && user != null
-            && user.isSystemAdministratorRoleGranted();
+            && user.isPermissionGrantedGlobally(Permission.ENABLE_DISABLE_AGENT);
   }
 
   @Override
