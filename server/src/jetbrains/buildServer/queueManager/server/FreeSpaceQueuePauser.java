@@ -10,7 +10,7 @@ import jetbrains.buildServer.util.EventDispatcher;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Date;
-import java.util.Set;
+import java.util.Map;
 
 /**
  * Created with IntelliJ IDEA.
@@ -23,7 +23,7 @@ public class FreeSpaceQueuePauser extends BuildServerAdapter {
    * Key for disabling feature in {@code TeamCityProperties}
    */
   @NotNull
-  private static final String KEY = "teamcity.queuePauser.pauseOnNoDiskSpace";
+  private static final String KEY_AUTO_PAUSE = "teamcity.queuePauser.pauseOnNoDiskSpace";
 
   @NotNull
   private final QueueStateManager myQueueStateManager;
@@ -45,7 +45,7 @@ public class FreeSpaceQueuePauser extends BuildServerAdapter {
   }
 
   @Override
-  public void buildTypeAddedToQueue(final SBuildType buildType) {
+  public void buildTypeAddedToQueue(@NotNull final SBuildType buildType) {
     check();
   }
 
@@ -60,24 +60,28 @@ public class FreeSpaceQueuePauser extends BuildServerAdapter {
   }
 
   private boolean isEnabled() {
-    return TeamCityProperties.getBooleanOrTrue(KEY);
+    return TeamCityProperties.getBooleanOrTrue(KEY_AUTO_PAUSE);
   }
 
   /**
    * Checks if it is required to pause queue
    */
   private void check() {
-    if (isEnabled() && myQueueStateManager.readQueueState().isQueueEnabled()) {
-      final Set<String> dirsNoSpace = myDiskSpaceWatcher.getDirsNoSpace();
-      if (!dirsNoSpace.isEmpty()) { // some dirs lack required space remaining
-        final StringBuilder sb = new StringBuilder("insufficient disk space in the following director");
-        sb.append(dirsNoSpace.size() > 1 ? "ies: " : "y: ");
-        for (String dir: dirsNoSpace) {
-          sb.append(dir).append(", ");
+    if (isEnabled()) {
+      final QueueState qs = myQueueStateManager.readQueueState();
+      if (qs.isQueueEnabled()) {
+        // check if we need disabling it
+        final Map<String, Long> dirsNoSpace = myDiskSpaceWatcher.getDirsSpaceCritical();
+        if (!dirsNoSpace.isEmpty()) { // some dirs lack required space remaining
+          final StringBuilder sb = new StringBuilder("Insufficient disk space in the following director");
+          sb.append(dirsNoSpace.size() > 1 ? "ies: " : "y: ");
+          for (String dir: dirsNoSpace.keySet()) {
+            sb.append(dir).append(", ");
+          }
+          final String reason = sb.substring(0, sb.length() - 2);
+          final QueueState newState = new QueueStateImpl(false, null, reason, new Date());
+          myQueueStateManager.writeQueueState(newState);
         }
-        final String reason = sb.substring(0, sb.length() - 2);
-        final QueueState newState = new QueueStateImpl(false, null, reason, new Date());
-        myQueueStateManager.writeQueueState(newState);
       }
     }
   }
