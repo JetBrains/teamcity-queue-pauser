@@ -42,6 +42,7 @@ public class SettingsManagerImpl implements SettingsManager {
     public static final String CHANGED_BY = "state-changed-by";
     public static final String CHANGED_ON = "state-changed-on";
     public static final String CHANGED_REASON = "state-changed-reason";
+    public static final String CHANGED_BY_ACTOR = "state-changed-actor";
   }
 
   private static final Map<String, String> DEFAULTS;
@@ -50,6 +51,7 @@ public class SettingsManagerImpl implements SettingsManager {
     // queue is enabled by default
     defaults.put(FIELDS.QUEUE_ENABLED, Boolean.toString(Boolean.TRUE));
     defaults.put(FIELDS.CHANGED_ON, Long.toString(Dates.makeDate(2012, 12, 12).getTime())); // 12.12.2012 0:0:0  for ease of testing
+    defaults.put(FIELDS.CHANGED_BY_ACTOR, Actor.USER.name());
     DEFAULTS = Collections.unmodifiableMap(defaults);
   }
 
@@ -139,6 +141,24 @@ public class SettingsManagerImpl implements SettingsManager {
   @Override
   public void setQueueStateChangedReason(@NotNull final String reason) {
     writeValue(FIELDS.CHANGED_REASON, reason);
+  }
+
+  @NotNull
+  @Override
+  public Actor getQueueStateChangedActor() {
+    try {
+      myLock.readLock().lock();
+      return Actor.valueOf(readValueWithDefault(FIELDS.CHANGED_BY_ACTOR));
+    } catch(IllegalArgumentException e) {
+      return Actor.valueOf(DEFAULTS.get(FIELDS.CHANGED_BY_ACTOR));
+    } finally {
+      myLock.readLock().unlock();
+    }
+  }
+
+  @Override
+  public void setQueueStateChangedActor(@NotNull final Actor actor) {
+    writeValue(FIELDS.CHANGED_BY_ACTOR, actor.name());
   }
 
   /**

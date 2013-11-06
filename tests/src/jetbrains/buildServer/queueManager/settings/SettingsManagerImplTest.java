@@ -224,4 +224,44 @@ public class SettingsManagerImplTest extends BaseJMockTestCase {
 
     mySettingsManager.setQueueStateChangedReason(newValue);
   }
+
+  @Test
+  @TestFor(issues = "TW-33042")
+  public void testGetQueueStateChangedActor_Default() throws Exception {
+    m.checking(new Expectations() {{
+      oneOf(mySettingsMap).getValue(SettingsManagerImpl.FIELDS.CHANGED_BY_ACTOR);
+      will(returnValue(null));
+
+      oneOf(mySettingsMap).setValue(SettingsManagerImpl.FIELDS.CHANGED_BY_ACTOR, Actor.USER.name());
+    }});
+
+    final Actor result = mySettingsManager.getQueueStateChangedActor();
+    assertEquals(Actor.USER, result);
+  }
+
+  @Test
+  @TestFor(issues = "TW-33042")
+  public void testGetQueueStateChangedActor() throws Exception {
+    final Actor expected = Actor.values()[0];
+
+    m.checking(new Expectations() {{
+      oneOf(mySettingsMap).getValue(SettingsManagerImpl.FIELDS.CHANGED_BY_ACTOR);
+      will(returnValue(expected.name()));
+    }});
+
+    final Actor result = mySettingsManager.getQueueStateChangedActor();
+    assertEquals(expected, result);
+  }
+
+  @Test
+  @TestFor(issues = "TW-33042")
+  public void testSetQueueStateChangedActor() throws Exception {
+    final Actor value = Actor.values()[0];
+
+    m.checking(new Expectations() {{
+      oneOf(mySettingsMap).setValue(SettingsManagerImpl.FIELDS.CHANGED_BY_ACTOR, value.name());
+    }});
+
+    mySettingsManager.setQueueStateChangedActor(value);
+  }
 }

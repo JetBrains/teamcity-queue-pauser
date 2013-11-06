@@ -17,6 +17,7 @@
 package jetbrains.buildServer.queueManager.server;
 
 import jetbrains.buildServer.log.Loggers;
+import jetbrains.buildServer.queueManager.settings.Actor;
 import jetbrains.buildServer.queueManager.settings.QueueState;
 import jetbrains.buildServer.queueManager.settings.QueueStateImpl;
 import jetbrains.buildServer.queueManager.settings.QueueStateManager;
@@ -73,7 +74,7 @@ public final class ChangeQueueStateAction implements ControllerAction {
     final String comment = request.getParameter(PARAM_STATE_CHANGE_REASON);
     final SUser user = getUser();
     final Date date = new Date();
-    final QueueState state = new QueueStateImpl(newQueueState, user, comment, date);
+    final QueueState state = new QueueStateImpl(newQueueState, user, comment, date, Actor.USER);
     myQueueStateManager.writeQueueState(state);
     processState(state, request);
   }
@@ -92,7 +93,7 @@ public final class ChangeQueueStateAction implements ControllerAction {
    * @param state new queue state
    * @param request http request, that changed queue state
    */
-  private void processState(@NotNull QueueState state, @NotNull HttpServletRequest request) {
+  private void processState(@NotNull final QueueState state, @NotNull final HttpServletRequest request) {
     Loggers.SERVER.warn(describeState(state, request));
   }
 
@@ -103,7 +104,7 @@ public final class ChangeQueueStateAction implements ControllerAction {
    * @return message with state change description
    */
   @NotNull
-  private String describeState(@NotNull QueueState state, @NotNull HttpServletRequest request) {
+  private String describeState(@NotNull final QueueState state, @NotNull final HttpServletRequest request) {
     final StringBuilder builder = new StringBuilder();
     builder.append("Queue was ").append(state.isQueueEnabled() ? "resumed" : "paused");
     if (state.getUser() != null) {

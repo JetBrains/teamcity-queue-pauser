@@ -60,6 +60,7 @@ public class QueueStateManagerImplTest extends BaseJMockTestCase {
     final Date expectedDate = Dates.today();
     final String expectedReason  = "Some expected reason";
     final long userId = 0L;
+    final Actor expectedActor = Actor.USER;
 
     m.checking(new Expectations() {{
       oneOf(mySettingsManager).isQueueEnabled();
@@ -77,6 +78,9 @@ public class QueueStateManagerImplTest extends BaseJMockTestCase {
       oneOf(mySettingsManager).getQueueStateChangedReason();
       will(returnValue(expectedReason));
 
+      oneOf(mySettingsManager).getQueueStateChangedActor();
+      will(returnValue(expectedActor));
+
     }});
 
     final QueueState queueState = myQueueStateManager.readQueueState();
@@ -92,6 +96,7 @@ public class QueueStateManagerImplTest extends BaseJMockTestCase {
     final Date expectedDate = Dates.today();
     final String expectedReason  = "Some expected reason";
     final long userId = 0L;
+    final Actor expectedActor = Actor.USER;
 
     m.checking(new Expectations() {{
       oneOf(mySettingsManager).isQueueEnabled();
@@ -108,6 +113,9 @@ public class QueueStateManagerImplTest extends BaseJMockTestCase {
 
       oneOf(mySettingsManager).getQueueStateChangedReason();
       will(returnValue(expectedReason));
+
+      oneOf(mySettingsManager).getQueueStateChangedActor();
+      will(returnValue(expectedActor));
 
     }});
 
@@ -126,7 +134,7 @@ public class QueueStateManagerImplTest extends BaseJMockTestCase {
     final String newReason  = "Some new reason";
     final long userId = 12345L;
 
-    final QueueState stateToWrite = new QueueStateImpl(newQueueState, myUser, newReason, newDate);
+    final QueueState stateToWrite = new QueueStateImpl(newQueueState, myUser, newReason, newDate, Actor.USER);
 
     m.checking(new Expectations() {{
       oneOf(mySettingsManager).setQueueEnabled(newQueueState);
@@ -137,6 +145,7 @@ public class QueueStateManagerImplTest extends BaseJMockTestCase {
       oneOf(mySettingsManager).setQueueStateChangedBy(userId);
       oneOf(mySettingsManager).setQueueStateChangedReason(newReason);
       oneOf(mySettingsManager).setQueueStateChangedOn(newDate);
+      oneOf(mySettingsManager).setQueueStateChangedActor(Actor.USER);
     }});
 
     myQueueStateManager.writeQueueState(stateToWrite);
@@ -148,15 +157,15 @@ public class QueueStateManagerImplTest extends BaseJMockTestCase {
     final boolean newQueueState = true;
     final Date newDate = Dates.yesterday();
     final String newReason = "Some new reason";
-    final SUser user = null;
 
-    final QueueState  stateToWrite = new QueueStateImpl(newQueueState, user, newReason, newDate);
+    final QueueState  stateToWrite = new QueueStateImpl(newQueueState, null, newReason, newDate, Actor.USER);
 
     m.checking(new Expectations() {{
       oneOf(mySettingsManager).setQueueEnabled(newQueueState);
       oneOf(mySettingsManager).setQueueStateChangedBy(null);
       oneOf(mySettingsManager).setQueueStateChangedReason(newReason);
       oneOf(mySettingsManager).setQueueStateChangedOn(newDate);
+      oneOf(mySettingsManager).setQueueStateChangedActor(Actor.USER);
     }});
 
     myQueueStateManager.writeQueueState(stateToWrite);

@@ -23,12 +23,15 @@ public final class QueueStateImpl implements QueueState {
 
   @NotNull
   private final Date timestamp;
+  @NotNull
+  private final Actor myActor;
 
-  public QueueStateImpl(boolean enabled, @Nullable SUser user, @NotNull String reason, @NotNull Date date) {
+  public QueueStateImpl(boolean enabled, @Nullable SUser user, @NotNull String reason, @NotNull Date date, @NotNull final Actor actor) {
     this.queueEnabled = enabled;
     this.user = user;
     this.reason = reason;
     this.timestamp = date;
+    this.myActor = actor;
   }
 
   @Override
@@ -52,5 +55,11 @@ public final class QueueStateImpl implements QueueState {
   @NotNull
   public Date getTimestamp() {
     return timestamp;
+  }
+
+  @NotNull
+  @Override
+  public Actor getActor() {
+    return myActor;
   }
 }

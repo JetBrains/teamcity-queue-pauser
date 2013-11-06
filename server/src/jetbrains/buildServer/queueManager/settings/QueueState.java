@@ -37,4 +37,7 @@ public interface QueueState {
 
   @NotNull
   Date getTimestamp();
+
+  @NotNull
+  Actor getActor();
 }

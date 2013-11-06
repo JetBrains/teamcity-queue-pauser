@@ -1,3 +1,4 @@
+<%--suppress CheckValidXmlInScriptTagBody --%>
 <%--
   ~ Copyright 2000-2012 JetBrains s.r.o.
   ~
@@ -15,11 +16,13 @@
   --%>
 <%@ include file="/include.jsp" %>
 <%@ page import="jetbrains.buildServer.queueManager.PluginConstants" %>
+<%@ page import="jetbrains.buildServer.queueManager.settings.Actor" %>
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 
 <c:set var="PARAM_NEW_QUEUE_STATE" value="<%=PluginConstants.WEB.PARAM_NEW_QUEUE_STATE%>"/>
 <c:set var="PARAM_STATE_CHANGE_REASON" value="<%=PluginConstants.WEB.PARAM_STATE_CHANGE_REASON%>"/>
 <c:set var="QUEUE_ACTIONS_URL" value="<%=PluginConstants.WEB.QUEUE_ACTIONS_URL%>"/>
+<c:set var="ACTOR_USER" value="<%=Actor.USER%>"/>
 
 <jsp:useBean id="queueState" scope="request" type="jetbrains.buildServer.queueManager.settings.QueueState"/>
 <c:set var="queueIsActive" value="${queueState.queueEnabled}"/>
@@ -89,11 +92,12 @@
     }
   }));
 
-  <%----------------------------------------------------------%>
+
+  <c:if test="${queueState.actor eq ACTOR_USER}">
   $j(document).ready(function() {
     $j('.quickLinks').append('<a href="#" class="quickLinksItem" onclick="BS.ChangeQueueStateDialog.showDialog();">${switchQueueStateActionText}</a>');
   });
-  <%--------------%>
+  </c:if>
 </script>
 
 

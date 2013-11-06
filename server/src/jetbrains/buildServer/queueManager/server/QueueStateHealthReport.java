@@ -16,6 +16,7 @@
 
 package jetbrains.buildServer.queueManager.server;
 
+import jetbrains.buildServer.queueManager.settings.Actor;
 import jetbrains.buildServer.queueManager.settings.QueueState;
 import jetbrains.buildServer.queueManager.settings.QueueStateManager;
 import jetbrains.buildServer.serverSide.healthStatus.*;
@@ -42,19 +43,21 @@ public class QueueStateHealthReport extends HealthStatusReport {
   @NotNull
   private static final String CATEGORY_NAME = "Build queue";
 
-
   @NotNull
   private final ItemCategory myCategory;
-
 
   @NotNull
   private final QueueStateManager myQueueStateManager;
 
+  @NotNull
+  private final FreeSpaceQueuePauser myFreeSpaceQueuePauser;
 
-  public QueueStateHealthReport(@NotNull PluginDescriptor pluginDescriptor,
+  public QueueStateHealthReport(@NotNull final PluginDescriptor pluginDescriptor,
                                 @NotNull final QueueStateManager queueStateManager,
-                                @NotNull final PagePlaces pagePlaces) {
+                                @NotNull final PagePlaces pagePlaces,
+                                @NotNull final FreeSpaceQueuePauser freeSpaceQueuePauser) {
     myQueueStateManager = queueStateManager;
+    myFreeSpaceQueuePauser = freeSpaceQueuePauser;
     myCategory = new ItemCategory(CATEGORY_ID, CATEGORY_NAME, ItemSeverity.WARN);
     final HealthStatusItemPageExtension myPEx = new HealthStatusItemPageExtension(CATEGORY_ID, pagePlaces);
     myPEx.setIncludeUrl(pluginDescriptor.getPluginResourcesPath("queueStateItemDisplay.jsp"));
@@ -72,7 +75,7 @@ public class QueueStateHealthReport extends HealthStatusReport {
   @NotNull
   @Override
   public String getDisplayName() {
-    return "Queue state display name";
+    return "Build queue state report";
   }
 
   @NotNull
@@ -87,6 +90,7 @@ public class QueueStateHealthReport extends HealthStatusReport {
     if (!queueState.isQueueEnabled()) {
       final Map<String, Object> myData = new HashMap<String, Object>();
       myData.put("QUEUE_STATE", queueState);
+      myData.put("allowManualResume", queueState.getActor().equals(Actor.USER) || !myFreeSpaceQueuePauser.isResumingEnabled());
       resultConsumer.consumeGlobal(new HealthStatusItem(CATEGORY_ID, myCategory, myData));
     }
   }

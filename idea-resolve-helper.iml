@@ -12,6 +12,7 @@
           <file>file://$TeamCityDistribution$/webapps/ROOT/WEB-INF/build-server-plugin-freespace.xml</file>
           <file>file://$TeamCityDistribution$/webapps/ROOT/WEB-INF/build-server-plugin-buildFailures.xml</file>
           <file>file://$TeamCityDistribution$/webapps/ROOT/WEB-INF/buildServerSpringStatistics.xml</file>
+          <file>file://$TeamCityDistribution$/webapps/ROOT/WEB-INF/build-server-plugin-auto-merge.xml</file>
         </fileset>
       </configuration>
     </facet>

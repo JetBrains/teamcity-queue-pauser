@@ -14,11 +14,11 @@ public interface QueueStateManager {
    * @return queue state
    */
   @NotNull
-  public QueueState readQueueState();
+  QueueState readQueueState();
 
   /**
    * Writes queue state to storage
    * @param queueState queue state
    */
-  public void writeQueueState(@NotNull final QueueState queueState);
+  void writeQueueState(@NotNull final QueueState queueState);
 }

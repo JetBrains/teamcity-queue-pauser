@@ -40,11 +40,16 @@ public interface SettingsManager {
   @NotNull
   Date getQueueStateChangedOn();
 
-  void setQueueStateChangedOn(@NotNull Date date);
+  void setQueueStateChangedOn(@NotNull final Date date);
 
   @NotNull
   String getQueueStateChangedReason();
 
-  void setQueueStateChangedReason(@NotNull String reason);
+  void setQueueStateChangedReason(@NotNull final String reason);
+
+  @NotNull
+  Actor getQueueStateChangedActor();
+
+  void setQueueStateChangedActor(@NotNull final Actor actor);
 
 }

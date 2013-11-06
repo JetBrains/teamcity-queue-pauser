@@ -36,7 +36,8 @@ public class QueueStateManagerImpl implements QueueStateManager {
               mySettingsManager.isQueueEnabled(),
               userId != null ? myUserModel.findUserById(userId) : null,
               mySettingsManager.getQueueStateChangedReason(),
-              mySettingsManager.getQueueStateChangedOn()
+              mySettingsManager.getQueueStateChangedOn(),
+              mySettingsManager.getQueueStateChangedActor()
       );
     } finally {
       myLock.readLock().unlock();
@@ -51,6 +52,7 @@ public class QueueStateManagerImpl implements QueueStateManager {
       mySettingsManager.setQueueStateChangedBy(queueState.getUser() != null ? queueState.getUser().getId(): null);
       mySettingsManager.setQueueStateChangedOn(queueState.getTimestamp());
       mySettingsManager.setQueueStateChangedReason(queueState.getReason());
+      mySettingsManager.setQueueStateChangedActor(queueState.getActor());
     } finally {
       myLock.writeLock().unlock();
     }

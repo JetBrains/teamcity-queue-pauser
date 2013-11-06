@@ -1,5 +1,6 @@
 package jetbrains.buildServer.queueManager.server;
 
+import jetbrains.buildServer.queueManager.settings.Actor;
 import jetbrains.buildServer.queueManager.settings.QueueState;
 import jetbrains.buildServer.queueManager.settings.QueueStateImpl;
 import jetbrains.buildServer.queueManager.settings.QueueStateManager;
@@ -7,6 +8,7 @@ import jetbrains.buildServer.serverSide.*;
 import jetbrains.buildServer.serverSide.impl.DiskSpaceWatcher;
 import jetbrains.buildServer.users.User;
 import jetbrains.buildServer.util.EventDispatcher;
+import jetbrains.buildServer.util.StringUtil;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Date;
@@ -24,6 +26,15 @@ public class FreeSpaceQueuePauser extends BuildServerAdapter {
    */
   @NotNull
   private static final String KEY_AUTO_PAUSE = "teamcity.queuePauser.pauseOnNoDiskSpace";
+
+  /**
+   * Key for auto resuming queue
+   */
+  @NotNull
+  private static final String KEY_AUTO_RESUME = "teamcity.queuePauser.resumeOnDiskSpace";
+
+  @NotNull
+  private static final Actor ACTOR = Actor.FREE_SPACE_QUEUE_PAUSER;
 
   @NotNull
   private final QueueStateManager myQueueStateManager;
@@ -50,12 +61,12 @@ public class FreeSpaceQueuePauser extends BuildServerAdapter {
   }
 
   @Override
-  public void buildTypeAddedToQueue(@NotNull SQueuedBuild queuedBuild) {
+  public void buildTypeAddedToQueue(@NotNull final SQueuedBuild queuedBuild) {
     check();
   }
 
   @Override
-  public void buildRemovedFromQueue(@NotNull SQueuedBuild queued, User user, String comment) {
+  public void buildRemovedFromQueue(@NotNull final SQueuedBuild queued, final User user, final String comment) {
     check();
   }
 
@@ -63,26 +74,51 @@ public class FreeSpaceQueuePauser extends BuildServerAdapter {
     return TeamCityProperties.getBooleanOrTrue(KEY_AUTO_PAUSE);
   }
 
-  /**
-   * Checks if it is required to pause queue
-   */
+  public boolean isResumingEnabled() {
+    return TeamCityProperties.getBooleanOrTrue(KEY_AUTO_RESUME);
+  }
+
+  private boolean canResume(@NotNull final QueueState state, @NotNull final Map<String, Long> dirsNoSpace) {
+    return isResumingEnabled() && ACTOR.equals(state.getActor()) && dirsNoSpace.isEmpty();
+  }
+
   private void check() {
     if (isEnabled()) {
       final QueueState qs = myQueueStateManager.readQueueState();
+      final Map<String, Long> dirsNoSpace = myDiskSpaceWatcher.getDirsSpaceCritical();
       if (qs.isQueueEnabled()) {
-        // check if we need disabling it
-        final Map<String, Long> dirsNoSpace = myDiskSpaceWatcher.getDirsSpaceCritical();
-        if (!dirsNoSpace.isEmpty()) { // some dirs lack required space remaining
-          final StringBuilder sb = new StringBuilder("Insufficient disk space in the following director");
-          sb.append(dirsNoSpace.size() > 1 ? "ies: " : "y: ");
-          for (String dir: dirsNoSpace.keySet()) {
-            sb.append(dir).append(", ");
-          }
-          final String reason = sb.substring(0, sb.length() - 2);
-          final QueueState newState = new QueueStateImpl(false, null, reason, new Date());
+        if (!dirsNoSpace.isEmpty()) {
+          final QueueState newState = new QueueStateImpl(false, null, getPauseReason(dirsNoSpace), new Date(), ACTOR);
+          myQueueStateManager.writeQueueState(newState);
+        }
+      } else {
+        // queue is disabled. try to resume
+        if (canResume(qs, dirsNoSpace)) {
+          final String reason = "Queue was automatically enabled as disk space became available";
+          final QueueState newState = new QueueStateImpl(true, null, reason, new Date(), ACTOR);
           myQueueStateManager.writeQueueState(newState);
         }
       }
     }
+  }
+
+  private String getPauseReason(@NotNull final Map<String, Long> dirsNoSpace) {
+    final StringBuilder sb = new StringBuilder("Insufficient disk space in the following director");
+    sb.append(dirsNoSpace.size() > 1 ? "ies: " : "y: ");
+    boolean first = true;
+    for (Map.Entry<String, Long> e: dirsNoSpace.entrySet()) {
+      if (!first) {
+        sb.append(", ");
+      }
+      sb.append(e.getKey());
+      sb.append(" (");
+      sb.append(StringUtil.formatFileSize(e.getValue()));
+      sb.append(")");
+      first = false;
+    }
+    sb.append(". Disk space threshold is set to ");
+    sb.append(StringUtil.formatFileSize(myDiskSpaceWatcher.getThreshold()));
+    sb.append(".");
+    return sb.toString();
   }
 }

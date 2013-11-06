@@ -1,11 +1,13 @@
 package jetbrains.buildServer.queueManager.server;
 
 import jetbrains.buildServer.BaseTestCase;
+import jetbrains.buildServer.queueManager.settings.Actor;
 import jetbrains.buildServer.queueManager.settings.QueueState;
 import jetbrains.buildServer.queueManager.settings.QueueStateManager;
-import jetbrains.buildServer.serverSide.*;
+import jetbrains.buildServer.serverSide.BuildServerListener;
+import jetbrains.buildServer.serverSide.FileWatchingPropertiesModel;
+import jetbrains.buildServer.serverSide.TeamCityProperties;
 import jetbrains.buildServer.serverSide.impl.DiskSpaceWatcher;
-import jetbrains.buildServer.users.User;
 import jetbrains.buildServer.util.EventDispatcher;
 import jetbrains.buildServer.util.FileUtil;
 import jetbrains.buildServer.util.TestFor;
@@ -18,6 +20,7 @@ import org.testng.annotations.Test;
 
 import java.io.File;
 import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -40,6 +43,9 @@ public class FreeSpaceQueuePauserTest extends BaseTestCase {
 
   private QueueState myQueueState;
 
+  /** class under test */
+  private FreeSpaceQueuePauser pauser;
+
   @BeforeMethod
   @Override
   @SuppressWarnings("unchecked")
@@ -52,101 +58,40 @@ public class FreeSpaceQueuePauserTest extends BaseTestCase {
     myDispatcher = m.mock(EventDispatcher.class);
     myQueueState = m.mock(QueueState.class);
     myQueueStateManager = m.mock(QueueStateManager.class);
-  }
-
-  @Test(enabled = false)
-  public void testBuildQueueChanged() {
-    runTests(setupForBuildQueueChanged());
-  }
-
-  @Test(enabled = false)
-  public void testBuildTypeAddedToQueue() {
-    runTests(setupForBuildTypeAdded());
-  }
-
-  @Test(enabled = false)
-  public void testQueueBuildAddedToQueue() {
-    runTests(setupForQueuedBuildTypeAdded());
-  }
-
-  @Test(enabled = false)
-  public void testBuildRemovedFromQueue() {
-    runTests(setupForQueuedBuildRemoved());
-  }
-
-  private void runTests(@NotNull final Runnable r) {
-    testQueuePaused_DoNothing(r);
-    testSpaceSufficient(r);
-    testSpaceInsufficient_PauseQueue(r);
-    testDisabled_DoNothing(r);
-  }
-
-  @NotNull
-  private Runnable setupForQueuedBuildRemoved() {
-    return new Runnable() {
-      private final SQueuedBuild myBuildType = m.mock(SQueuedBuild.class);
-      private final User myUser = m.mock(User.class);
-      private final String myComment = "Comment";
-
-      @Override
-      public void run() {
-        final FreeSpaceQueuePauser pauser = new FreeSpaceQueuePauser(myDispatcher, myQueueStateManager, myDiskSpaceWatcher);
-        pauser.buildRemovedFromQueue(myBuildType, myUser, myComment);
-      }
-    };
-  }
-
-  @NotNull
-  private Runnable setupForQueuedBuildTypeAdded() {
-    return new Runnable() {
-      private final SQueuedBuild myBuildType = m.mock(SQueuedBuild.class);
-
-      @Override
-      public void run() {
-        final FreeSpaceQueuePauser pauser = new FreeSpaceQueuePauser(myDispatcher, myQueueStateManager, myDiskSpaceWatcher);
-        pauser.buildTypeAddedToQueue(myBuildType);
-      }
-    };
-  }
-
-  @NotNull
-  private Runnable setupForBuildQueueChanged() {
-    return new Runnable() {
-      @Override
-      public void run() {
-        final FreeSpaceQueuePauser pauser = new FreeSpaceQueuePauser(myDispatcher, myQueueStateManager, myDiskSpaceWatcher);
-        pauser.buildQueueOrderChanged();
-      }
-    };
-  }
-
-  @NotNull
-  private Runnable setupForBuildTypeAdded() {
-    return new Runnable() {
-      private final SBuildType myBuildType = m.mock(SBuildType.class);
-
-      @Override
-      public void run() {
-        final FreeSpaceQueuePauser pauser = new FreeSpaceQueuePauser(myDispatcher, myQueueStateManager, myDiskSpaceWatcher);
-        pauser.buildTypeAddedToQueue(myBuildType);
-      }
-    };
-  }
-
-  private void testQueuePaused_DoNothing(@NotNull final Runnable r) {
     m.checking(new Expectations() {{
       allowing(myDispatcher);
+    }});
+    pauser = new FreeSpaceQueuePauser(myDispatcher, myQueueStateManager, myDiskSpaceWatcher);
+  }
+
+  private void invoke() throws Exception {
+    final Method m = pauser.getClass().getDeclaredMethod("check");
+    m.setAccessible(true);
+    m.invoke(pauser);
+  }
+
+  @Test
+  public void testQueuePaused_DoNothing() throws Exception {
+    m.checking(new Expectations() {{
 
       oneOf(myQueueStateManager).readQueueState();
       will(returnValue(myQueueState));
 
       oneOf(myQueueState).isQueueEnabled();
       will(returnValue(false));
+
+      oneOf(myQueueState).getActor();
+      will(returnValue(Actor.USER));
+
+      oneOf(myDiskSpaceWatcher).getDirsSpaceCritical();
+      will(returnValue(Collections.emptyMap()));
     }});
-    r.run();
+    invoke();
+    m.assertIsSatisfied();
   }
 
-  private void testSpaceSufficient(@NotNull final Runnable r) {
+  @Test
+  public void testSpaceSufficient() throws Exception {
     m.checking(new Expectations() {{
       allowing(myDispatcher);
 
@@ -159,10 +104,11 @@ public class FreeSpaceQueuePauserTest extends BaseTestCase {
       oneOf(myDiskSpaceWatcher).getDirsSpaceCritical();
       will(returnValue(Collections.emptyMap()));
     }});
-    r.run();
+    invoke();
   }
 
-  private void testSpaceInsufficient_PauseQueue(@NotNull final Runnable r) {
+  @Test
+  public void testSpaceInsufficient_PauseQueue() throws Exception {
     final Map<String, Long> paths = new HashMap<String, Long>() {{
       put("path1", 123L);
       put("path2", 123L);
@@ -181,29 +127,115 @@ public class FreeSpaceQueuePauserTest extends BaseTestCase {
       oneOf(myDiskSpaceWatcher).getDirsSpaceCritical();
       will(returnValue(paths));
 
+      oneOf(myDiskSpaceWatcher).getThreshold();
+      will(returnValue(1000L));
+
       exactly(1).of(same(myQueueStateManager)).method("writeQueueState");
     }});
-    r.run();
+    invoke();
   }
 
-  private void testDisabled_DoNothing(@NotNull final Runnable r) {
+  @Test
+  @TestFor(issues = "TW-33042")
+  public void testAutoResume_Disabled_DoNothing() throws Exception {
+    final String text = "teamcity.internal.properties.reread.interval.ms=100\n" +
+            "teamcity.queuePauser.pauseOnNoDiskSpace=true\n" +
+            "teamcity.queuePauser.resumeOnDiskSpace=false";
+    changeTeamCityProperties(text);
+    m.checking(new Expectations() {{
+      allowing(myDispatcher);
+
+      oneOf(myQueueStateManager).readQueueState();
+      will(returnValue(myQueueState));
+
+      oneOf(myQueueState).isQueueEnabled();
+      will(returnValue(false));
+
+      oneOf(myDiskSpaceWatcher).getDirsSpaceCritical();
+      will(returnValue(Collections.emptyMap()));
+
+    }});
+    invoke();
+  }
+
+  @Test
+  @TestFor(issues = "TW-33042")
+  public void testAutoResume_Enabled_CanResume() throws Exception {
+    final String text = "teamcity.internal.properties.reread.interval.ms=100\n" +
+            "teamcity.queuePauser.pauseOnNoDiskSpace=true\n" +
+            "teamcity.queuePauser.resumeOnDiskSpace=true";
+    changeTeamCityProperties(text);
+    m.checking(new Expectations() {{
+      allowing(myDispatcher);
+
+      oneOf(myQueueStateManager).readQueueState();
+      will(returnValue(myQueueState));
+
+      oneOf(myQueueState).isQueueEnabled();
+      will(returnValue(false));
+
+      oneOf(myDiskSpaceWatcher).getDirsSpaceCritical();
+      will(returnValue(Collections.emptyMap()));
+
+      oneOf(myQueueState).getActor();
+      will(returnValue(Actor.FREE_SPACE_QUEUE_PAUSER));
+
+      exactly(1).of(same(myQueueStateManager)).method("writeQueueState");
+
+    }});
+    invoke();
+  }
+
+  @Test
+  @TestFor(issues = "TW-33042")
+  public void testAutoResume_Enabled_WrongActor() throws Exception {
+    final String text = "teamcity.internal.properties.reread.interval.ms=100\n" +
+            "teamcity.queuePauser.pauseOnNoDiskSpace=true\n" +
+            "teamcity.queuePauser.resumeOnDiskSpace=true";
+    changeTeamCityProperties(text);
+    m.checking(new Expectations() {{
+      allowing(myDispatcher);
+
+      oneOf(myQueueStateManager).readQueueState();
+      will(returnValue(myQueueState));
+
+      oneOf(myQueueState).isQueueEnabled();
+      will(returnValue(false));
+
+      oneOf(myDiskSpaceWatcher).getDirsSpaceCritical();
+      will(returnValue(Collections.emptyMap()));
+
+      oneOf(myQueueState).getActor();
+      will(returnValue(Actor.USER));
+
+    }});
+    invoke();
+  }
+
+  @Test
+  public void testDisabled_DoNothing() throws Exception {
+    final String text = "teamcity.internal.properties.reread.interval.ms=100\n" +
+            "teamcity.queuePauser.pauseOnNoDiskSpace=false";
+    changeTeamCityProperties(text);
+    m.checking(new Expectations() {{
+      allowing(myDispatcher);
+    }});
+    invoke();
+  }
+
+  private void changeTeamCityProperties(@NotNull final String propsString) {
     try {
-      final String text = "teamcity.internal.properties.reread.interval.ms=100\n" +
-              "teamcity.queuePauser.pauseOnNoDiskSpace=false";
-      final File myProps = createTempFile(text);
+      final File myProps = createTempFile(propsString);
       final FileWatchingPropertiesModel myModel = new FileWatchingPropertiesModel(myProps);
       final Field field = TeamCityProperties.class.getDeclaredField("ourModel");
       field.setAccessible(true);
       field.set(TeamCityProperties.class, myModel);
-      FileUtil.writeFileAndReportErrors(myProps, text);
+      FileUtil.writeFileAndReportErrors(myProps, propsString);
       myModel.forceReloadProperties();
     } catch (Exception e) {
       fail(e.getMessage());
     }
-    m.checking(new Expectations() {{
-      allowing(myDispatcher);
-    }});
-    r.run();
-
   }
+
+
 }
