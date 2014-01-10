@@ -4,9 +4,11 @@ import jetbrains.buildServer.queueManager.settings.Actor;
 import jetbrains.buildServer.queueManager.settings.QueueState;
 import jetbrains.buildServer.queueManager.settings.QueueStateImpl;
 import jetbrains.buildServer.queueManager.settings.QueueStateManager;
-import jetbrains.buildServer.serverSide.*;
+import jetbrains.buildServer.serverSide.BuildServerAdapter;
+import jetbrains.buildServer.serverSide.BuildServerListener;
+import jetbrains.buildServer.serverSide.TeamCityProperties;
 import jetbrains.buildServer.serverSide.impl.DiskSpaceWatcher;
-import jetbrains.buildServer.users.User;
+import jetbrains.buildServer.util.Alarm;
 import jetbrains.buildServer.util.EventDispatcher;
 import jetbrains.buildServer.util.StringUtil;
 import org.jetbrains.annotations.NotNull;
@@ -19,7 +21,7 @@ import java.util.Map;
  *
  * @author Oleg Rybak (oleg.rybak@jetbrains.com)
  */
-public class FreeSpaceQueuePauser extends BuildServerAdapter {
+public class FreeSpaceQueuePauser {
 
   /**
    * Key for disabling feature in {@code TeamCityProperties}
@@ -37,37 +39,44 @@ public class FreeSpaceQueuePauser extends BuildServerAdapter {
   private static final Actor ACTOR = Actor.FREE_SPACE_QUEUE_PAUSER;
 
   @NotNull
+  private final EventDispatcher<BuildServerListener> myDispatcher;
+
+  @NotNull
   private final QueueStateManager myQueueStateManager;
 
   @NotNull
   private final DiskSpaceWatcher myDiskSpaceWatcher;
 
+  private Alarm myWatcher = null;
+
   public FreeSpaceQueuePauser(@NotNull final EventDispatcher<BuildServerListener> dispatcher,
                               @NotNull final QueueStateManager queueStateManager,
                               @NotNull final DiskSpaceWatcher diskSpaceWatcher) {
+    myDispatcher = dispatcher;
     myQueueStateManager = queueStateManager;
     myDiskSpaceWatcher = diskSpaceWatcher;
-    dispatcher.addListener(this);
+    initWatcher();
   }
 
-  @Override
-  public void buildQueueOrderChanged() {
-    check();
-  }
-
-  @Override
-  public void buildTypeAddedToQueue(@NotNull final SBuildType buildType) {
-    check();
-  }
-
-  @Override
-  public void buildTypeAddedToQueue(@NotNull final SQueuedBuild queuedBuild) {
-    check();
-  }
-
-  @Override
-  public void buildRemovedFromQueue(@NotNull final SQueuedBuild queued, final User user, final String comment) {
-    check();
+  private void initWatcher() {
+    int dswRepeatDelay = TeamCityProperties.getInteger("teamcity.diskSpaceWatcher.repeatDelay", 120 * 1000); // 120 seconds
+    int qpRepeatDelay = TeamCityProperties.getInteger("teamcity.queuePauser.repeatDelay", dswRepeatDelay);
+    qpRepeatDelay = Math.max(dswRepeatDelay + 1000, qpRepeatDelay); // no use updating more frequently than dsw
+    if (myWatcher == null) {
+      myWatcher = new Alarm("Queue pause/resume watcher");
+      myWatcher.addRepeatableRequest(new Runnable() {
+        @Override
+        public void run() {
+          check();
+        }
+      }, qpRepeatDelay, qpRepeatDelay);
+      myDispatcher.addListener(new BuildServerAdapter() {
+        @Override
+        public void serverShutdown() {
+          myWatcher.dispose();
+        }
+      });
+    }
   }
 
   private boolean isEnabled() {
