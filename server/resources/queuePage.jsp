@@ -115,8 +115,8 @@
             onblur="if (this.value == '') this.value='&lt;your comment here&gt;'">&lt;your comment here&gt;</textarea>
   <input type="hidden" name="${PARAM_NEW_QUEUE_STATE}" value="${not queueIsActive}">
   <div class="popupSaveButtonsBlock">
-    <forms:cancel onclick="BS.ChangeQueueStateDialog.close()"/>
     <forms:submit  label="Save" id="ChangeQueueStateSubmitButton"/>
+    <forms:cancel onclick="BS.ChangeQueueStateDialog.close()"/>
     <forms:saving/>
   </div>
 </bs:modalDialog>
