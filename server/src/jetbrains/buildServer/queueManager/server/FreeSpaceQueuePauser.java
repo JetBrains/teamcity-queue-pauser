@@ -36,6 +36,9 @@ public class FreeSpaceQueuePauser {
   private static final String KEY_AUTO_RESUME = "teamcity.queuePauser.resumeOnDiskSpace";
 
   @NotNull
+  public static final String DEFAULT_REASON = "Insufficient disk space. Please contact your system administrator.";
+
+  @NotNull
   private static final Actor ACTOR = Actor.FREE_SPACE_QUEUE_PAUSER;
 
   @NotNull
