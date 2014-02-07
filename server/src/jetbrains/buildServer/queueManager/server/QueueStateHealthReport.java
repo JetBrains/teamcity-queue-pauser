@@ -58,7 +58,7 @@ public class QueueStateHealthReport extends HealthStatusReport {
                                 @NotNull final FreeSpaceQueuePauser freeSpaceQueuePauser) {
     myQueueStateManager = queueStateManager;
     myFreeSpaceQueuePauser = freeSpaceQueuePauser;
-    myCategory = new ItemCategory(CATEGORY_ID, CATEGORY_NAME, ItemSeverity.WARN);
+    myCategory = new ItemCategory(CATEGORY_ID, CATEGORY_NAME, ItemSeverity.ERROR);
     final HealthStatusItemPageExtension myPEx = new HealthStatusItemPageExtension(CATEGORY_ID, pagePlaces);
     myPEx.setIncludeUrl(pluginDescriptor.getPluginResourcesPath("queueStateItemDisplay.jsp"));
     myPEx.addJsFile(pluginDescriptor.getPluginResourcesPath("/js/QueueStateActions.js"));
