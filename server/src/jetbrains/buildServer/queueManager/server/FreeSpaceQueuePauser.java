@@ -97,7 +97,7 @@ public class FreeSpaceQueuePauser {
   private void check() {
     if (isEnabled()) {
       final QueueState qs = myQueueStateManager.readQueueState();
-      final Map<String, Long> dirsNoSpace = myDiskSpaceWatcher.getDirsSpaceCritical();
+      final Map<String, Long> dirsNoSpace = myDiskSpaceWatcher.getDirsNoSpace();
       if (qs.isQueueEnabled()) {
         if (!dirsNoSpace.isEmpty()) {
           final QueueState newState = new QueueStateImpl(false, null, getPauseReason(dirsNoSpace), new Date(), ACTOR);
