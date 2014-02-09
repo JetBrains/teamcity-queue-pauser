@@ -13,8 +13,7 @@ import jetbrains.buildServer.util.EventDispatcher;
 import jetbrains.buildServer.util.StringUtil;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.Date;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Created with IntelliJ IDEA.
@@ -28,6 +27,11 @@ public class FreeSpaceQueuePauser {
    */
   @NotNull
   private static final String KEY_AUTO_PAUSE = "teamcity.queuePauser.pauseOnNoDiskSpace";
+
+  @NotNull
+  private static final String KEY_PAUSE_THRESHOLD = "teamcity.pauseBuildQueue.diskSpace.threshold";
+
+  private static final long DEFAULT_THRESHOLD = 50 * 1024; // Default queue pausing threshold
 
   /**
    * Key for auto resuming queue
@@ -98,7 +102,16 @@ public class FreeSpaceQueuePauser {
     if (isEnabled()) {
       final QueueState qs = myQueueStateManager.readQueueState();
       final Map<String, Long> dirsNoSpace = myDiskSpaceWatcher.getDirsNoSpace();
+      final Long threshold = TeamCityProperties.getLong(KEY_PAUSE_THRESHOLD, DEFAULT_THRESHOLD) * 1024;
+      // filter dirs that have enough space to run build
+      final Set<String> keys = new HashSet<String>(dirsNoSpace.keySet());
+      for (String key: keys) {
+        if (dirsNoSpace.get(key) > threshold) {
+          dirsNoSpace.remove(key);
+        }
+      }
       if (qs.isQueueEnabled()) {
+        // disable queue
         if (!dirsNoSpace.isEmpty()) {
           final QueueState newState = new QueueStateImpl(false, null, getPauseReason(dirsNoSpace), new Date(), ACTOR);
           myQueueStateManager.writeQueueState(newState);

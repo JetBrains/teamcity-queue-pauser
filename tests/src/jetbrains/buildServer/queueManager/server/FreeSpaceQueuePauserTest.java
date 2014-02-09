@@ -83,7 +83,7 @@ public class FreeSpaceQueuePauserTest extends BaseTestCase {
       oneOf(myQueueState).getActor();
       will(returnValue(Actor.USER));
 
-      oneOf(myDiskSpaceWatcher).getDirsSpaceCritical();
+      oneOf(myDiskSpaceWatcher).getDirsNoSpace();
       will(returnValue(Collections.emptyMap()));
     }});
     invoke();
@@ -101,18 +101,17 @@ public class FreeSpaceQueuePauserTest extends BaseTestCase {
       oneOf(myQueueState).isQueueEnabled();
       will(returnValue(true));
 
-      oneOf(myDiskSpaceWatcher).getDirsSpaceCritical();
+      oneOf(myDiskSpaceWatcher).getDirsNoSpace();
       will(returnValue(Collections.emptyMap()));
     }});
     invoke();
   }
 
   @Test
-  public void testSpaceInsufficient_PauseQueue() throws Exception {
+  @TestFor(issues = "TW-34816")
+  public void testSpaceInsufficient_DoNotPauseQueue() throws Exception {
     final Map<String, Long> paths = new HashMap<String, Long>() {{
-      put("path1", 123L);
-      put("path2", 123L);
-      put("path3", 123L);
+      put("path1", 51 * 1024 * 1024L);
     }};
 
     m.checking(new Expectations() {{
@@ -124,7 +123,34 @@ public class FreeSpaceQueuePauserTest extends BaseTestCase {
       oneOf(myQueueState).isQueueEnabled();
       will(returnValue(true));
 
-      oneOf(myDiskSpaceWatcher).getDirsSpaceCritical();
+      oneOf(myDiskSpaceWatcher).getDirsNoSpace();
+      will(returnValue(paths));
+
+      oneOf(myDiskSpaceWatcher).getThreshold();
+      will(returnValue(1000L));
+
+      exactly(1).of(same(myQueueStateManager)).method("writeQueueState");
+    }});
+    invoke();
+  }
+
+  @Test
+  public void testSpaceInsufficient_PauseQueue() throws Exception {
+    final Map<String, Long> paths = new HashMap<String, Long>() {{
+      put("path1", 49 * 1024 * 1024L);
+      put("path2", 51 * 1024 * 1024L);
+    }};
+
+    m.checking(new Expectations() {{
+      allowing(myDispatcher);
+
+      oneOf(myQueueStateManager).readQueueState();
+      will(returnValue(myQueueState));
+
+      oneOf(myQueueState).isQueueEnabled();
+      will(returnValue(true));
+
+      oneOf(myDiskSpaceWatcher).getDirsNoSpace();
       will(returnValue(paths));
 
       oneOf(myDiskSpaceWatcher).getThreshold();
@@ -151,7 +177,7 @@ public class FreeSpaceQueuePauserTest extends BaseTestCase {
       oneOf(myQueueState).isQueueEnabled();
       will(returnValue(false));
 
-      oneOf(myDiskSpaceWatcher).getDirsSpaceCritical();
+      oneOf(myDiskSpaceWatcher).getDirsNoSpace();
       will(returnValue(Collections.emptyMap()));
 
     }});
@@ -174,7 +200,7 @@ public class FreeSpaceQueuePauserTest extends BaseTestCase {
       oneOf(myQueueState).isQueueEnabled();
       will(returnValue(false));
 
-      oneOf(myDiskSpaceWatcher).getDirsSpaceCritical();
+      oneOf(myDiskSpaceWatcher).getDirsNoSpace();
       will(returnValue(Collections.emptyMap()));
 
       oneOf(myQueueState).getActor();
@@ -202,7 +228,7 @@ public class FreeSpaceQueuePauserTest extends BaseTestCase {
       oneOf(myQueueState).isQueueEnabled();
       will(returnValue(false));
 
-      oneOf(myDiskSpaceWatcher).getDirsSpaceCritical();
+      oneOf(myDiskSpaceWatcher).getDirsNoSpace();
       will(returnValue(Collections.emptyMap()));
 
       oneOf(myQueueState).getActor();
