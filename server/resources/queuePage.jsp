@@ -92,8 +92,7 @@
     }
   }));
 
-
-  <c:if test="${queueState.actor eq ACTOR_USER}">
+  <c:if test="${queueState.actor eq ACTOR_USER || queueState.queueEnabled}">
   $j(document).ready(function() {
     $j('.quickLinks').append('<a href="#" class="quickLinksItem" onclick="BS.ChangeQueueStateDialog.showDialog();">${switchQueueStateActionText}</a>');
   });
