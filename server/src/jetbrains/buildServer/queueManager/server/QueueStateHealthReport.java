@@ -85,6 +85,11 @@ public class QueueStateHealthReport extends HealthStatusReport {
   }
 
   @Override
+  public boolean canReportItemsFor(HealthStatusScope scope) {
+    return scope.globalItems();
+  }
+
+  @Override
   public void report(@NotNull final HealthStatusScope scope, @NotNull final HealthStatusItemConsumer resultConsumer) {
     final QueueState queueState = myQueueStateManager.readQueueState();
     if (!queueState.isQueueEnabled()) {
