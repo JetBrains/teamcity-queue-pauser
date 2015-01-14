@@ -39,7 +39,7 @@
   </c:choose>
 </c:set>
 <div>
-  ${action}${user}${date}${reason} No builds will be started until the queue is resumed.<bs:help file="Build+Queue" anchor="Pausing%2FResumingBuildQueue"/>
+  ${action}${user}${date}${reason}. No builds will be started until the queue is resumed.<bs:help file="Build+Queue" anchor="Pausing%2FResumingBuildQueue"/>
 
   <c:set var="allowResume">
     <%
