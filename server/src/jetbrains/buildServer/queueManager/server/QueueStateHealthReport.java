@@ -25,6 +25,7 @@ import jetbrains.buildServer.web.openapi.PluginDescriptor;
 import jetbrains.buildServer.web.openapi.healthStatus.HealthStatusItemPageExtension;
 import org.jetbrains.annotations.NotNull;
 
+import javax.servlet.http.HttpServletRequest;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -59,7 +60,12 @@ public class QueueStateHealthReport extends HealthStatusReport {
     myQueueStateManager = queueStateManager;
     myFreeSpaceQueuePauser = freeSpaceQueuePauser;
     myCategory = new ItemCategory(CATEGORY_ID, CATEGORY_NAME, ItemSeverity.ERROR);
-    final HealthStatusItemPageExtension myPEx = new HealthStatusItemPageExtension(CATEGORY_ID, pagePlaces);
+    final HealthStatusItemPageExtension myPEx = new HealthStatusItemPageExtension(CATEGORY_ID, pagePlaces) {
+      @Override
+      public boolean isAvailable(@NotNull final HttpServletRequest request) {
+        return !myQueueStateManager.readQueueState().isQueueEnabled() && super.isAvailable(request);
+      }
+    };
     myPEx.setIncludeUrl(pluginDescriptor.getPluginResourcesPath("queueStateItemDisplay.jsp"));
     myPEx.addJsFile(pluginDescriptor.getPluginResourcesPath("/js/QueueStateActions.js"));
     myPEx.setVisibleOutsideAdminArea(true);
@@ -85,7 +91,7 @@ public class QueueStateHealthReport extends HealthStatusReport {
   }
 
   @Override
-  public boolean canReportItemsFor(HealthStatusScope scope) {
+  public boolean canReportItemsFor(@NotNull HealthStatusScope scope) {
     return scope.globalItems();
   }
 
