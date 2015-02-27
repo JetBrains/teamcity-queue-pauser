@@ -59,7 +59,7 @@ public class QueueStateChangePageExtension extends SimplePageExtension {
     super(pagePlaces);
     mySecurityContext = securityContext;
     myQueueStateManager = queueStateManager;
-    setPlaceId(PlaceId.ALL_PAGES_FOOTER);
+    setPlaceId(PlaceId.BEFORE_CONTENT);
     setPluginName(descriptor.getPluginName());
     setIncludeUrl(descriptor.getPluginResourcesPath(EXTENSION_INCLUDE_URL));
   }
@@ -67,7 +67,8 @@ public class QueueStateChangePageExtension extends SimplePageExtension {
   @Override
   public boolean isAvailable(@NotNull final HttpServletRequest request) {
     final SUser user = (SUser) mySecurityContext.getAuthorityHolder().getAssociatedUser();
-    return WebUtil.getPathWithoutAuthenticationType(request).startsWith(EXTENSION_AVAILABILITY_URL)
+    String uri = (String) request.getAttribute("javax.servlet.forward.request_uri");
+    return WebUtil.getPathWithoutAuthenticationType(WebUtil.getPathWithoutContext(request, uri)).startsWith(EXTENSION_AVAILABILITY_URL)
             && user != null
             && user.isPermissionGrantedGlobally(Permission.ENABLE_DISABLE_AGENT);
   }
