@@ -67,8 +67,7 @@ public class QueueStateChangePageExtension extends SimplePageExtension {
   @Override
   public boolean isAvailable(@NotNull final HttpServletRequest request) {
     final SUser user = (SUser) mySecurityContext.getAuthorityHolder().getAssociatedUser();
-    String uri = (String) request.getAttribute("javax.servlet.forward.request_uri");
-    return WebUtil.getPathWithoutAuthenticationType(WebUtil.getPathWithoutContext(request, uri)).startsWith(EXTENSION_AVAILABILITY_URL)
+    return WebUtil.getPathWithoutAuthenticationType(WebUtil.getPathWithoutContext(request, WebUtil.getOriginalRequestUrl(request))).startsWith(EXTENSION_AVAILABILITY_URL)
             && user != null
             && user.isPermissionGrantedGlobally(Permission.ENABLE_DISABLE_AGENT);
   }
