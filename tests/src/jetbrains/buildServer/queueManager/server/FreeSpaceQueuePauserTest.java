@@ -74,16 +74,16 @@ public class FreeSpaceQueuePauserTest extends BaseTestCase {
   public void testQueuePaused_DoNothing() throws Exception {
     m.checking(new Expectations() {{
 
-      oneOf(myQueueStateManager).readQueueState();
+      allowing(myQueueStateManager).readQueueState();
       will(returnValue(myQueueState));
 
-      oneOf(myQueueState).isQueueEnabled();
+      allowing(myQueueState).isQueueEnabled();
       will(returnValue(false));
 
-      oneOf(myQueueState).getActor();
+      allowing(myQueueState).getActor();
       will(returnValue(Actor.USER));
 
-      oneOf(myDiskSpaceWatcher).getDirsNoSpace();
+      allowing(myDiskSpaceWatcher).getDirsNoSpace();
       will(returnValue(Collections.emptyMap()));
     }});
     invoke();
@@ -95,13 +95,13 @@ public class FreeSpaceQueuePauserTest extends BaseTestCase {
     m.checking(new Expectations() {{
       allowing(myDispatcher);
 
-      oneOf(myQueueStateManager).readQueueState();
+      allowing(myQueueStateManager).readQueueState();
       will(returnValue(myQueueState));
 
-      oneOf(myQueueState).isQueueEnabled();
+      allowing(myQueueState).isQueueEnabled();
       will(returnValue(true));
 
-      oneOf(myDiskSpaceWatcher).getDirsNoSpace();
+      allowing(myDiskSpaceWatcher).getDirsNoSpace();
       will(returnValue(Collections.emptyMap()));
     }});
     invoke();
@@ -117,16 +117,16 @@ public class FreeSpaceQueuePauserTest extends BaseTestCase {
     m.checking(new Expectations() {{
       allowing(myDispatcher);
 
-      oneOf(myQueueStateManager).readQueueState();
+      allowing(myQueueStateManager).readQueueState();
       will(returnValue(myQueueState));
 
-      oneOf(myQueueState).isQueueEnabled();
+      allowing(myQueueState).isQueueEnabled();
       will(returnValue(true));
 
-      oneOf(myDiskSpaceWatcher).getDirsNoSpace();
+      allowing(myDiskSpaceWatcher).getDirsNoSpace();
       will(returnValue(paths));
 
-      oneOf(myDiskSpaceWatcher).getThreshold();
+      allowing(myDiskSpaceWatcher).getThreshold();
       will(returnValue(1000L));
 
       exactly(1).of(same(myQueueStateManager)).method("writeQueueState");
@@ -144,16 +144,16 @@ public class FreeSpaceQueuePauserTest extends BaseTestCase {
     m.checking(new Expectations() {{
       allowing(myDispatcher);
 
-      oneOf(myQueueStateManager).readQueueState();
+      allowing(myQueueStateManager).readQueueState();
       will(returnValue(myQueueState));
 
-      oneOf(myQueueState).isQueueEnabled();
+      allowing(myQueueState).isQueueEnabled();
       will(returnValue(true));
 
-      oneOf(myDiskSpaceWatcher).getDirsNoSpace();
+      allowing(myDiskSpaceWatcher).getDirsNoSpace();
       will(returnValue(paths));
 
-      oneOf(myDiskSpaceWatcher).getThreshold();
+      allowing(myDiskSpaceWatcher).getThreshold();
       will(returnValue(1000L));
 
       exactly(1).of(same(myQueueStateManager)).method("writeQueueState");
@@ -171,13 +171,13 @@ public class FreeSpaceQueuePauserTest extends BaseTestCase {
     m.checking(new Expectations() {{
       allowing(myDispatcher);
 
-      oneOf(myQueueStateManager).readQueueState();
+      allowing(myQueueStateManager).readQueueState();
       will(returnValue(myQueueState));
 
-      oneOf(myQueueState).isQueueEnabled();
+      allowing(myQueueState).isQueueEnabled();
       will(returnValue(false));
 
-      oneOf(myDiskSpaceWatcher).getDirsNoSpace();
+      allowing(myDiskSpaceWatcher).getDirsNoSpace();
       will(returnValue(Collections.emptyMap()));
 
     }});
@@ -194,16 +194,16 @@ public class FreeSpaceQueuePauserTest extends BaseTestCase {
     m.checking(new Expectations() {{
       allowing(myDispatcher);
 
-      oneOf(myQueueStateManager).readQueueState();
+      allowing(myQueueStateManager).readQueueState();
       will(returnValue(myQueueState));
 
-      oneOf(myQueueState).isQueueEnabled();
+      allowing(myQueueState).isQueueEnabled();
       will(returnValue(false));
 
-      oneOf(myDiskSpaceWatcher).getDirsNoSpace();
+      allowing(myDiskSpaceWatcher).getDirsNoSpace();
       will(returnValue(Collections.emptyMap()));
 
-      oneOf(myQueueState).getActor();
+      allowing(myQueueState).getActor();
       will(returnValue(Actor.FREE_SPACE_QUEUE_PAUSER));
 
       exactly(1).of(same(myQueueStateManager)).method("writeQueueState");
@@ -222,16 +222,16 @@ public class FreeSpaceQueuePauserTest extends BaseTestCase {
     m.checking(new Expectations() {{
       allowing(myDispatcher);
 
-      oneOf(myQueueStateManager).readQueueState();
+      allowing(myQueueStateManager).readQueueState();
       will(returnValue(myQueueState));
 
-      oneOf(myQueueState).isQueueEnabled();
+      allowing(myQueueState).isQueueEnabled();
       will(returnValue(false));
 
-      oneOf(myDiskSpaceWatcher).getDirsNoSpace();
+      allowing(myDiskSpaceWatcher).getDirsNoSpace();
       will(returnValue(Collections.emptyMap()));
 
-      oneOf(myQueueState).getActor();
+      allowing(myQueueState).getActor();
       will(returnValue(Actor.USER));
 
     }});
