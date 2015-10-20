@@ -33,13 +33,13 @@
 <c:set var="reason">
   <c:choose>
     <c:when test="${not empty queueState.reason}">
-      &nbsp;with the comment: <%=MessageViewer.viewMessage(currentUser, (QueueState)additionalData.get("QUEUE_STATE"))%>
+      with the comment: <%=MessageViewer.viewMessage(currentUser, (QueueState)additionalData.get("QUEUE_STATE"))%>
     </c:when>
     <c:otherwise/>
   </c:choose>
 </c:set>
 <div>
-  ${action}${user}${date}${reason}. No builds will be started until the queue is resumed.<bs:help file="Build+Queue" anchor="Pausing%2FResumingBuildQueue"/>
+  ${action}${user}${date}<c:if test="${not empty reason}">&nbsp;<bs:out value="${reason}"/></c:if>. No builds will be started until the queue is resumed.<bs:help file="Build+Queue" anchor="Pausing%2FResumingBuildQueue"/>
 
   <c:set var="allowResume">
     <%
