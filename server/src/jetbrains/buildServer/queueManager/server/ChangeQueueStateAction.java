@@ -21,6 +21,7 @@ import jetbrains.buildServer.queueManager.settings.Actor;
 import jetbrains.buildServer.queueManager.settings.QueueState;
 import jetbrains.buildServer.queueManager.settings.QueueStateImpl;
 import jetbrains.buildServer.queueManager.settings.QueueStateManager;
+import jetbrains.buildServer.serverSide.audit.AuditLogFactory;
 import jetbrains.buildServer.serverSide.auth.Permission;
 import jetbrains.buildServer.serverSide.auth.SecurityContext;
 import jetbrains.buildServer.users.SUser;
@@ -38,6 +39,8 @@ import java.util.Date;
 
 import static jetbrains.buildServer.queueManager.PluginConstants.WEB.PARAM_NEW_QUEUE_STATE;
 import static jetbrains.buildServer.queueManager.PluginConstants.WEB.PARAM_STATE_CHANGE_REASON;
+import static jetbrains.buildServer.serverSide.audit.ActionType.BUILD_QUEUE_DISABLED;
+import static jetbrains.buildServer.serverSide.audit.ActionType.BUILD_QUEUE_ENABLED;
 
 /**
  * Created with IntelliJ IDEA.
@@ -52,11 +55,16 @@ public final class ChangeQueueStateAction implements ControllerAction {
   @NotNull
   private final SecurityContext mySecurityContext;
 
+  @NotNull
+  private final AuditLogFactory myLogFactory;
+
   public ChangeQueueStateAction(@NotNull final QueueStateManager queueStateManager,
                                 @NotNull final QueueStateController queueStateController,
-                                @NotNull final SecurityContext securityContext) {
+                                @NotNull final SecurityContext securityContext,
+                                @NotNull final AuditLogFactory logFactory) {
     myQueueStateManager = queueStateManager;
     mySecurityContext = securityContext;
+    myLogFactory = logFactory;
     queueStateController.registerAction(this);
   }
 
@@ -75,8 +83,7 @@ public final class ChangeQueueStateAction implements ControllerAction {
     final SUser user = getUser();
     final Date date = new Date();
     final QueueState state = new QueueStateImpl(newQueueState, user, comment, date, Actor.USER);
-    myQueueStateManager.writeQueueState(state);
-    processState(state, request);
+    changeStateAndLog(state, request);
   }
 
   /**
@@ -93,7 +100,11 @@ public final class ChangeQueueStateAction implements ControllerAction {
    * @param state new queue state
    * @param request http request, that changed queue state
    */
-  private void processState(@NotNull final QueueState state, @NotNull final HttpServletRequest request) {
+  private void changeStateAndLog(@NotNull final QueueState state, @NotNull final HttpServletRequest request) {
+    myQueueStateManager.writeQueueState(state);
+    myLogFactory.createForServer().logUserAction(
+            state.isQueueEnabled() ? BUILD_QUEUE_ENABLED: BUILD_QUEUE_DISABLED,
+            state.getReason(), null);
     Loggers.SERVER.warn(describeState(state, request));
   }
 
