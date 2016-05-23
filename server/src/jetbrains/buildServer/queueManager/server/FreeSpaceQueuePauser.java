@@ -40,7 +40,7 @@ public class FreeSpaceQueuePauser {
   private static final String KEY_AUTO_RESUME = "teamcity.queuePauser.resumeOnDiskSpace";
 
   @NotNull
-  public static final String DEFAULT_REASON = "Insufficient disk space. Please contact your system administrator.";
+  static final String DEFAULT_REASON = "Insufficient disk space. Please contact your system administrator.";
 
   @NotNull
   private static final Actor ACTOR = Actor.FREE_SPACE_QUEUE_PAUSER;
@@ -71,12 +71,7 @@ public class FreeSpaceQueuePauser {
     qpRepeatDelay = Math.max(dswRepeatDelay + 1000, qpRepeatDelay); // no use updating more frequently than dsw
     if (myWatcher == null) {
       myWatcher = new Alarm("Queue pause/resume watcher");
-      myWatcher.addRepeatableRequest(new Runnable() {
-        @Override
-        public void run() {
-          check();
-        }
-      }, qpRepeatDelay, qpRepeatDelay);
+      myWatcher.addRepeatableRequest(this::check, qpRepeatDelay, qpRepeatDelay);
       myDispatcher.addListener(new BuildServerAdapter() {
         @Override
         public void serverShutdown() {
@@ -90,7 +85,7 @@ public class FreeSpaceQueuePauser {
     return TeamCityProperties.getBooleanOrTrue(KEY_AUTO_PAUSE);
   }
 
-  public boolean isResumingEnabled() {
+  boolean isResumingEnabled() {
     return TeamCityProperties.getBooleanOrTrue(KEY_AUTO_RESUME);
   }
 
@@ -104,12 +99,8 @@ public class FreeSpaceQueuePauser {
       final Map<String, Long> dirsNoSpace = myDiskSpaceWatcher.getDirsNoSpace();
       final Long threshold = TeamCityProperties.getLong(KEY_PAUSE_THRESHOLD, DEFAULT_THRESHOLD) * 1024;
       // filter dirs that have enough space to run build
-      final Set<String> keys = new HashSet<String>(dirsNoSpace.keySet());
-      for (String key: keys) {
-        if (dirsNoSpace.get(key) > threshold) {
-          dirsNoSpace.remove(key);
-        }
-      }
+      final Set<String> keys = new HashSet<>(dirsNoSpace.keySet());
+      keys.stream().filter(key -> dirsNoSpace.get(key) > threshold).forEach(dirsNoSpace::remove);
       if (qs.isQueueEnabled()) {
         // disable queue
         if (!dirsNoSpace.isEmpty()) {

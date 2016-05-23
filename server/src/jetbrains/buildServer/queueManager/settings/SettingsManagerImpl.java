@@ -38,16 +38,16 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 public class SettingsManagerImpl implements SettingsManager {
 
   interface FIELDS {
-    public static final String QUEUE_ENABLED = "queue-enabled";
-    public static final String CHANGED_BY = "state-changed-by";
-    public static final String CHANGED_ON = "state-changed-on";
-    public static final String CHANGED_REASON = "state-changed-reason";
-    public static final String CHANGED_BY_ACTOR = "state-changed-actor";
+    String QUEUE_ENABLED = "queue-enabled";
+    String CHANGED_BY = "state-changed-by";
+    String CHANGED_ON = "state-changed-on";
+    String CHANGED_REASON = "state-changed-reason";
+    String CHANGED_BY_ACTOR = "state-changed-actor";
   }
 
   private static final Map<String, String> DEFAULTS;
   static {
-    final Map<String, String> defaults = new HashMap<String, String>();
+    final Map<String, String> defaults = new HashMap<>();
     // queue is enabled by default
     defaults.put(FIELDS.QUEUE_ENABLED, Boolean.toString(Boolean.TRUE));
     defaults.put(FIELDS.CHANGED_ON, Long.toString(Dates.makeDate(2012, 12, 12).getTime())); // 12.12.2012 0:0:0  for ease of testing

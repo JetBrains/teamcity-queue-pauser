@@ -99,7 +99,7 @@ public class QueueStateHealthReport extends HealthStatusReport {
   public void report(@NotNull final HealthStatusScope scope, @NotNull final HealthStatusItemConsumer resultConsumer) {
     final QueueState queueState = myQueueStateManager.readQueueState();
     if (!queueState.isQueueEnabled()) {
-      final Map<String, Object> myData = new HashMap<String, Object>();
+      final Map<String, Object> myData = new HashMap<>();
       myData.put("QUEUE_STATE", queueState);
       myData.put("allowManualResume", queueState.getActor().equals(Actor.USER) || !myFreeSpaceQueuePauser.isResumingEnabled());
       resultConsumer.consumeGlobal(new HealthStatusItem(CATEGORY_ID, myCategory, myData));

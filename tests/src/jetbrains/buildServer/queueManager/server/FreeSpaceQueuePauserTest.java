@@ -113,24 +113,7 @@ public class FreeSpaceQueuePauserTest extends BaseTestCase {
     final Map<String, Long> paths = new HashMap<String, Long>() {{
       put("path1", 51 * 1024 * 1024L);
     }};
-
-    m.checking(new Expectations() {{
-      allowing(myDispatcher);
-
-      allowing(myQueueStateManager).readQueueState();
-      will(returnValue(myQueueState));
-
-      allowing(myQueueState).isQueueEnabled();
-      will(returnValue(true));
-
-      allowing(myDiskSpaceWatcher).getDirsNoSpace();
-      will(returnValue(paths));
-
-      allowing(myDiskSpaceWatcher).getThreshold();
-      will(returnValue(1000L));
-
-      exactly(1).of(same(myQueueStateManager)).method("writeQueueState");
-    }});
+    setupExpectationsAndThreshold(paths, 1000L);
     invoke();
   }
 
@@ -140,7 +123,11 @@ public class FreeSpaceQueuePauserTest extends BaseTestCase {
       put("path1", 49 * 1024 * 1024L);
       put("path2", 51 * 1024 * 1024L);
     }};
+    setupExpectationsAndThreshold(paths, 1000L);
+    invoke();
+  }
 
+  private void setupExpectationsAndThreshold(Map<String, Long> paths, long threshold) {
     m.checking(new Expectations() {{
       allowing(myDispatcher);
 
@@ -154,11 +141,10 @@ public class FreeSpaceQueuePauserTest extends BaseTestCase {
       will(returnValue(paths));
 
       allowing(myDiskSpaceWatcher).getThreshold();
-      will(returnValue(1000L));
+      will(returnValue(threshold));
 
       exactly(1).of(same(myQueueStateManager)).method("writeQueueState");
     }});
-    invoke();
   }
 
   @Test

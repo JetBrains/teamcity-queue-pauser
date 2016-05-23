@@ -17,7 +17,6 @@
 package jetbrains.buildServer.queueManager.server;
 
 import jetbrains.buildServer.BaseJMockTestCase;
-import jetbrains.buildServer.BuildAgent;
 import jetbrains.buildServer.Mocked;
 import jetbrains.buildServer.queueManager.settings.QueueState;
 import jetbrains.buildServer.queueManager.settings.QueueStateManager;
@@ -71,7 +70,7 @@ public class StartStopWaitPreconditionTest extends BaseJMockTestCase {
       will(returnValue(true));
     }});
 
-    final WaitReason result = myWaitPrecondition.canStart(canStart, Collections.<QueuedBuildInfo, BuildAgent>emptyMap(), myBuildDistributorInput, false);
+    final WaitReason result = myWaitPrecondition.canStart(canStart, Collections.emptyMap(), myBuildDistributorInput, false);
     assertNull(result);
   }
 
@@ -85,7 +84,7 @@ public class StartStopWaitPreconditionTest extends BaseJMockTestCase {
       will(returnValue(false));
     }});
 
-    final WaitReason result = myWaitPrecondition.canStart(canStart, Collections.<QueuedBuildInfo, BuildAgent>emptyMap(), myBuildDistributorInput, false);
+    final WaitReason result = myWaitPrecondition.canStart(canStart, Collections.emptyMap(), myBuildDistributorInput, false);
     assertNotNull(result);
 
   }

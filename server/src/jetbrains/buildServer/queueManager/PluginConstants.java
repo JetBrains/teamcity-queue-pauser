@@ -22,15 +22,9 @@ package jetbrains.buildServer.queueManager;
 public final class PluginConstants {
 
   public interface WEB {
-
-    public static final String QUEUE_ACTIONS_URL = "/queueStartStop.html";
-
-    public static final String PARAM_NEW_QUEUE_STATE = "newQueueState";
-
-    public static final String PARAM_STATE_CHANGE_REASON = "stateChangeReason";
-
-    public static final String PARAM_QUEUE_STATE = "queueState";
-
-    public static final String PARAM_CAN_MANAGE = "canManage";
+    String QUEUE_ACTIONS_URL = "/queueStartStop.html";
+    String PARAM_NEW_QUEUE_STATE = "newQueueState";
+    String PARAM_STATE_CHANGE_REASON = "stateChangeReason";
+    String PARAM_QUEUE_STATE = "queueState";
   }
 }
