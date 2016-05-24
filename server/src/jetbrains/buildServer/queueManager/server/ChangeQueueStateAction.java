@@ -39,8 +39,8 @@ import java.util.Date;
 
 import static jetbrains.buildServer.queueManager.PluginConstants.WEB.PARAM_NEW_QUEUE_STATE;
 import static jetbrains.buildServer.queueManager.PluginConstants.WEB.PARAM_STATE_CHANGE_REASON;
-import static jetbrains.buildServer.serverSide.audit.ActionType.BUILD_QUEUE_DISABLED;
-import static jetbrains.buildServer.serverSide.audit.ActionType.BUILD_QUEUE_ENABLED;
+import static jetbrains.buildServer.serverSide.audit.ActionType.BUILD_QUEUE_PAUSED;
+import static jetbrains.buildServer.serverSide.audit.ActionType.BUILD_QUEUE_RESUMED;
 
 /**
  * Created with IntelliJ IDEA.
@@ -103,7 +103,7 @@ public final class ChangeQueueStateAction implements ControllerAction {
   private void changeStateAndLog(@NotNull final QueueState state, @NotNull final HttpServletRequest request) {
     myQueueStateManager.writeQueueState(state);
     myLogFactory.createForServer().logUserAction(
-            state.isQueueEnabled() ? BUILD_QUEUE_ENABLED: BUILD_QUEUE_DISABLED,
+            state.isQueueEnabled() ? BUILD_QUEUE_RESUMED: BUILD_QUEUE_PAUSED,
             state.getReason(), null);
     Loggers.SERVER.warn(describeState(state, request));
   }
