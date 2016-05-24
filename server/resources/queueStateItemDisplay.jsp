@@ -38,32 +38,32 @@
     <c:otherwise/>
   </c:choose>
 </c:set>
-<div>
-  ${action}${user}${date}<c:if test="${not empty reason}">&nbsp;<bs:out value="${reason}"/></c:if>. No builds will be started until the queue is resumed.<bs:help file="Build+Queue" anchor="Pausing%2FResumingBuildQueue"/>
 
-  <c:set var="allowResume">
-    <%
-      if (currentUser != null && currentUser.isSystemAdministratorRoleGranted()) {
-    %>
-      true
-    <%
-    } else {
-    %>
-    <authz:authorize allPermissions="ENABLE_DISABLE_AGENT">
+${action}${user}${date}<c:if test="${not empty reason}">&nbsp;<bs:out value="${reason}"/></c:if>. No builds will be started until the queue is resumed.<bs:help file="Build+Queue" anchor="Pausing%2FResumingBuildQueue"/>
+
+<c:set var="allowResume">
+  <%
+    if (currentUser != null && currentUser.isSystemAdministratorRoleGranted()) {
+  %>
+  true
+  <%
+  } else {
+  %>
+  <authz:authorize allPermissions="ENABLE_DISABLE_AGENT">
           <jsp:attribute name="ifAccessGranted">
             ${allowManualResume}
           </jsp:attribute>
-    </authz:authorize>
-    <%
-      }
-    %>
-  </c:set>
+  </authz:authorize>
+  <%
+    }
+  %>
+</c:set>
 
-  <c:if test="${allowResume}">
-    <div style="float:right">
-      <a class="btn btn_mini" href="#" onclick="BS.QueueStateActions.resumeQueue(); return false">Resume</a>
-    </div>
-  </c:if>
-</div>
+<c:if test="${allowResume}">
+  <div style="float:right">
+    <a class="btn btn_mini" href="#" onclick="BS.QueueStateActions.resumeQueue(); return false">Resume</a>
+  </div>
+</c:if>
+
 
 
