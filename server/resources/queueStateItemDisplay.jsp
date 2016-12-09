@@ -1,8 +1,8 @@
-<%@ page import="jetbrains.buildServer.web.util.SessionUser" %>
-<%@ page import="jetbrains.buildServer.users.SUser" %>
-<%@ page import="jetbrains.buildServer.queueManager.server.MessageViewer" %>
 <%@ page import="java.util.Map" %>
+<%@ page import="jetbrains.buildServer.queueManager.server.MessageViewer" %>
 <%@ page import="jetbrains.buildServer.queueManager.settings.QueueState" %>
+<%@ page import="jetbrains.buildServer.users.SUser" %>
+<%@ page import="jetbrains.buildServer.web.util.SessionUser" %>
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ include file="/include-internal.jsp" %>
 <jsp:useBean id="healthStatusItem" type="jetbrains.buildServer.serverSide.healthStatus.HealthStatusItem" scope="request"/>
@@ -39,7 +39,8 @@
   </c:choose>
 </c:set>
 
-${action}${user}${date}<c:if test="${not empty reason}">&nbsp;<bs:out value="${reason}"/></c:if>. No builds will be started until the queue is resumed.<bs:help file="Build+Queue" anchor="Pausing%2FResumingBuildQueue"/>
+${action}${user}${date}<c:if test="${not empty reason}">&nbsp;<bs:out value="${reason}"/></c:if><br/>
+No builds will be started until the queue is resumed.<bs:help file="Build+Queue" anchor="Pausing%2FResumingBuildQueue"/>
 
 <c:set var="allowResume">
   <%
