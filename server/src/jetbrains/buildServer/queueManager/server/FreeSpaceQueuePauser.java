@@ -1,5 +1,9 @@
 package jetbrains.buildServer.queueManager.server;
 
+import java.util.Date;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 import jetbrains.buildServer.queueManager.settings.Actor;
 import jetbrains.buildServer.queueManager.settings.QueueState;
 import jetbrains.buildServer.queueManager.settings.QueueStateImpl;
@@ -12,8 +16,6 @@ import jetbrains.buildServer.util.Alarm;
 import jetbrains.buildServer.util.EventDispatcher;
 import jetbrains.buildServer.util.StringUtil;
 import org.jetbrains.annotations.NotNull;
-
-import java.util.*;
 
 /**
  * Created with IntelliJ IDEA.
@@ -119,8 +121,8 @@ public class FreeSpaceQueuePauser {
   }
 
   private String getPauseReason(@NotNull final Map<String, Long> dirsNoSpace) {
-    final StringBuilder sb = new StringBuilder("Insufficient disk space in the following director");
-    sb.append(dirsNoSpace.size() > 1 ? "ies: " : "y: ");
+    final StringBuilder sb = new StringBuilder("Insufficient disk space in the following ");
+    sb.append(StringUtil.pluralize("directory", dirsNoSpace.size())).append(": ");
     boolean first = true;
     for (Map.Entry<String, Long> e: dirsNoSpace.entrySet()) {
       if (!first) {
