@@ -43,7 +43,9 @@ public class FreeSpaceQueuePauserTest extends BaseTestCase {
 
   private QueueState myQueueState;
 
-  /** class under test */
+  /**
+   * class under test
+   */
   private FreeSpaceQueuePauser pauser;
 
   @BeforeMethod
@@ -105,6 +107,7 @@ public class FreeSpaceQueuePauserTest extends BaseTestCase {
       will(returnValue(Collections.emptyMap()));
     }});
     invoke();
+    m.assertIsSatisfied();
   }
 
   @Test
@@ -113,8 +116,9 @@ public class FreeSpaceQueuePauserTest extends BaseTestCase {
     final Map<String, Long> paths = new HashMap<String, Long>() {{
       put("path1", 51 * 1024 * 1024L);
     }};
-    setupExpectationsAndThreshold(paths, 1000L);
+    setupExpectationsAndThreshold(paths, 50 * 1024L);
     invoke();
+    m.assertIsSatisfied();
   }
 
   @Test
@@ -123,27 +127,35 @@ public class FreeSpaceQueuePauserTest extends BaseTestCase {
       put("path1", 49 * 1024 * 1024L);
       put("path2", 51 * 1024 * 1024L);
     }};
-    setupExpectationsAndThreshold(paths, 1000L);
+    setupExpectationsAndThreshold(paths, 60 * 1024L);
+    setupExpectedQueuePause();
     invoke();
+    m.assertIsSatisfied();
   }
 
-  private void setupExpectationsAndThreshold(Map<String, Long> paths, long threshold) {
+  private void setupExpectationsAndThreshold(Map<String, Long> paths, long queuePauseThreshold) {
+    final String text = "teamcity.internal.properties.reread.interval.ms=100\n" +
+            "teamcity.queuePauser.pauseOnNoDiskSpace=true\n" +
+            "teamcity.queuePauser.resumeOnDiskSpace=false\n" +
+            "teamcity.pauseBuildQueue.diskSpace.threshold=" + queuePauseThreshold;
+    changeTeamCityProperties(text);
     m.checking(new Expectations() {{
       allowing(myDispatcher);
 
-      allowing(myQueueStateManager).readQueueState();
+      oneOf(myQueueStateManager).readQueueState();
       will(returnValue(myQueueState));
 
-      allowing(myQueueState).isQueueEnabled();
+      oneOf(myQueueState).isQueueEnabled();
       will(returnValue(true));
 
-      allowing(myDiskSpaceWatcher).getDirsNoSpace();
+      oneOf(myDiskSpaceWatcher).getDirsNoSpace();
       will(returnValue(paths));
+    }});
+  }
 
-      allowing(myDiskSpaceWatcher).getThreshold();
-      will(returnValue(threshold));
-
-      exactly(1).of(same(myQueueStateManager)).method("writeQueueState");
+  private void setupExpectedQueuePause() {
+    m.checking(new Expectations() {{
+      oneOf(myQueueStateManager).writeQueueState(with(any(QueueState.class)));
     }});
   }
 
@@ -157,17 +169,18 @@ public class FreeSpaceQueuePauserTest extends BaseTestCase {
     m.checking(new Expectations() {{
       allowing(myDispatcher);
 
-      allowing(myQueueStateManager).readQueueState();
+      oneOf(myQueueStateManager).readQueueState();
       will(returnValue(myQueueState));
 
-      allowing(myQueueState).isQueueEnabled();
+      oneOf(myQueueState).isQueueEnabled();
       will(returnValue(false));
 
-      allowing(myDiskSpaceWatcher).getDirsNoSpace();
+      oneOf(myDiskSpaceWatcher).getDirsNoSpace();
       will(returnValue(Collections.emptyMap()));
 
     }});
     invoke();
+    m.assertIsSatisfied();
   }
 
   @Test
@@ -180,22 +193,23 @@ public class FreeSpaceQueuePauserTest extends BaseTestCase {
     m.checking(new Expectations() {{
       allowing(myDispatcher);
 
-      allowing(myQueueStateManager).readQueueState();
+      oneOf(myQueueStateManager).readQueueState();
       will(returnValue(myQueueState));
 
-      allowing(myQueueState).isQueueEnabled();
+      oneOf(myQueueState).isQueueEnabled();
       will(returnValue(false));
 
-      allowing(myDiskSpaceWatcher).getDirsNoSpace();
+      oneOf(myDiskSpaceWatcher).getDirsNoSpace();
       will(returnValue(Collections.emptyMap()));
 
-      allowing(myQueueState).getActor();
+      oneOf(myQueueState).getActor();
       will(returnValue(Actor.FREE_SPACE_QUEUE_PAUSER));
 
       exactly(1).of(same(myQueueStateManager)).method("writeQueueState");
 
     }});
     invoke();
+    m.assertIsSatisfied();
   }
 
   @Test
@@ -208,20 +222,21 @@ public class FreeSpaceQueuePauserTest extends BaseTestCase {
     m.checking(new Expectations() {{
       allowing(myDispatcher);
 
-      allowing(myQueueStateManager).readQueueState();
+      oneOf(myQueueStateManager).readQueueState();
       will(returnValue(myQueueState));
 
-      allowing(myQueueState).isQueueEnabled();
+      oneOf(myQueueState).isQueueEnabled();
       will(returnValue(false));
 
-      allowing(myDiskSpaceWatcher).getDirsNoSpace();
+      oneOf(myDiskSpaceWatcher).getDirsNoSpace();
       will(returnValue(Collections.emptyMap()));
 
-      allowing(myQueueState).getActor();
+      oneOf(myQueueState).getActor();
       will(returnValue(Actor.USER));
 
     }});
     invoke();
+    m.assertIsSatisfied();
   }
 
   @Test
@@ -233,6 +248,7 @@ public class FreeSpaceQueuePauserTest extends BaseTestCase {
       allowing(myDispatcher);
     }});
     invoke();
+    m.assertIsSatisfied();
   }
 
   private void changeTeamCityProperties(@NotNull final String propsString) {
@@ -248,6 +264,4 @@ public class FreeSpaceQueuePauserTest extends BaseTestCase {
       fail(e.getMessage());
     }
   }
-
-
 }

@@ -18,6 +18,7 @@ package jetbrains.buildServer.queueManager.settings;
 
 import jetbrains.buildServer.users.SUser;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.Date;
 
@@ -30,6 +31,7 @@ public interface QueueState {
 
   boolean isQueueEnabled();
 
+  @Nullable
   SUser getUser();
 
   @NotNull

@@ -1,9 +1,6 @@
 package jetbrains.buildServer.queueManager.server;
 
-import java.util.Date;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
+import jetbrains.buildServer.log.Loggers;
 import jetbrains.buildServer.queueManager.settings.Actor;
 import jetbrains.buildServer.queueManager.settings.QueueState;
 import jetbrains.buildServer.queueManager.settings.QueueStateImpl;
@@ -16,6 +13,11 @@ import jetbrains.buildServer.util.Alarm;
 import jetbrains.buildServer.util.EventDispatcher;
 import jetbrains.buildServer.util.StringUtil;
 import org.jetbrains.annotations.NotNull;
+
+import java.util.Date;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * Created with IntelliJ IDEA.
@@ -95,26 +97,31 @@ public class FreeSpaceQueuePauser {
     return isResumingEnabled() && ACTOR.equals(state.getActor()) && dirsNoSpace.isEmpty();
   }
 
+  private long getThreshold() {
+    return TeamCityProperties.getLong(KEY_PAUSE_THRESHOLD, DEFAULT_THRESHOLD) * 1024;
+  }
+
   private void check() {
     if (isEnabled()) {
       final QueueState qs = myQueueStateManager.readQueueState();
       final Map<String, Long> dirsNoSpace = myDiskSpaceWatcher.getDirsNoSpace();
-      final Long threshold = TeamCityProperties.getLong(KEY_PAUSE_THRESHOLD, DEFAULT_THRESHOLD) * 1024;
-      // filter dirs that have enough space to run build
-      final Set<String> keys = new HashSet<>(dirsNoSpace.keySet());
+      final Long threshold = getThreshold();
+      final Set<String> keys = new HashSet<>(dirsNoSpace.keySet()); // filter dirs that have enough space to run build
       keys.stream().filter(key -> dirsNoSpace.get(key) > threshold).forEach(dirsNoSpace::remove);
       if (qs.isQueueEnabled()) {
-        // disable queue
-        if (!dirsNoSpace.isEmpty()) {
-          final QueueState newState = new QueueStateImpl(false, null, getPauseReason(dirsNoSpace), new Date(), ACTOR);
+        if (!dirsNoSpace.isEmpty()) { // disable queue
+          final String pauseReason = getPauseReason(dirsNoSpace);
+          final QueueState newState = new QueueStateImpl(false, null, pauseReason, new Date(), ACTOR);
           myQueueStateManager.writeQueueState(newState);
+          Loggers.SERVER.info("Build queue was automatically paused. " + pauseReason);
         }
       } else {
         // queue is disabled. try to resume
         if (canResume(qs, dirsNoSpace)) {
-          final String reason = "Queue was automatically enabled as disk space became available";
-          final QueueState newState = new QueueStateImpl(true, null, reason, new Date(), ACTOR);
+          final String resumeReason = "Queue was automatically enabled as disk space became available";
+          final QueueState newState = new QueueStateImpl(true, null, resumeReason, new Date(), ACTOR);
           myQueueStateManager.writeQueueState(newState);
+          Loggers.SERVER.info(resumeReason);
         }
       }
     }
@@ -135,7 +142,7 @@ public class FreeSpaceQueuePauser {
       first = false;
     }
     sb.append(". Disk space threshold is set to ");
-    sb.append(StringUtil.formatFileSize(myDiskSpaceWatcher.getThreshold()));
+    sb.append(StringUtil.formatFileSize(getThreshold()));
     sb.append(".");
     return sb.toString();
   }
