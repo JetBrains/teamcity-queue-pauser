@@ -13,48 +13,53 @@ import java.util.Date;
  */
 public final class QueueStateImpl implements QueueState {
 
-  private final boolean queueEnabled;
+  private final boolean myQueueEnabled;
 
   @Nullable
-  private final SUser user;
+  private final SUser myUser;
 
   @NotNull
-  private final String reason;
+  private final String myReason;
 
   @NotNull
-  private final Date timestamp;
+  private final Date myTimestamp;
+
   @NotNull
   private final Actor myActor;
 
-  public QueueStateImpl(boolean enabled, @Nullable SUser user, @NotNull String reason, @NotNull Date date, @NotNull final Actor actor) {
-    this.queueEnabled = enabled;
-    this.user = user;
-    this.reason = reason;
-    this.timestamp = date;
-    this.myActor = actor;
+  public QueueStateImpl(boolean enabled,
+                        @Nullable SUser user,
+                        @NotNull String reason,
+                        @NotNull Date timestamp,
+                        @NotNull final Actor actor) {
+    myQueueEnabled = enabled;
+    myUser = user;
+    myReason = reason;
+    myTimestamp = timestamp;
+    myActor = actor;
   }
 
   @Override
   public boolean isQueueEnabled() {
-    return queueEnabled;
+    return myQueueEnabled;
   }
 
   @Nullable
   @Override
   public SUser getUser() {
-    return user;
+    return myUser;
   }
 
   @Override
   @NotNull
   public String getReason() {
-    return reason;
+    return myReason;
   }
 
   @Override
   @NotNull
   public Date getTimestamp() {
-    return timestamp;
+    return myTimestamp;
   }
 
   @NotNull
