@@ -11,13 +11,16 @@ import jetbrains.buildServer.serverSide.TeamCityProperties;
 import jetbrains.buildServer.serverSide.impl.DiskSpaceWatcher;
 import jetbrains.buildServer.util.Alarm;
 import jetbrains.buildServer.util.EventDispatcher;
-import jetbrains.buildServer.util.StringUtil;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
+
+import static com.intellij.openapi.util.text.StringUtil.pluralize;
+import static jetbrains.buildServer.util.StringUtil.formatFileSize;
 
 /**
  * Created with IntelliJ IDEA.
@@ -110,10 +113,10 @@ public class FreeSpaceQueuePauser {
       keys.stream().filter(key -> dirsNoSpace.get(key) > threshold).forEach(dirsNoSpace::remove);
       if (qs.isQueueEnabled()) {
         if (!dirsNoSpace.isEmpty()) { // disable queue
-          final String pauseReason = getPauseReason(dirsNoSpace);
+          final String pauseReason = getPauseReason(dirsNoSpace, threshold);
           final QueueState newState = new QueueStateImpl(false, null, pauseReason, new Date(), ACTOR);
           myQueueStateManager.writeQueueState(newState);
-          Loggers.SERVER.info("Build queue was automatically paused. " + pauseReason);
+          Loggers.SERVER.warn("Build queue was automatically paused. " + pauseReason);
         }
       } else {
         // queue is disabled. try to resume
@@ -121,29 +124,20 @@ public class FreeSpaceQueuePauser {
           final String resumeReason = "Queue was automatically enabled as disk space became available";
           final QueueState newState = new QueueStateImpl(true, null, resumeReason, new Date(), ACTOR);
           myQueueStateManager.writeQueueState(newState);
-          Loggers.SERVER.info(resumeReason);
+          Loggers.SERVER.warn(resumeReason);
         }
       }
     }
   }
 
-  private String getPauseReason(@NotNull final Map<String, Long> dirsNoSpace) {
-    final StringBuilder sb = new StringBuilder("Insufficient disk space in the following ");
-    sb.append(StringUtil.pluralize("directory", dirsNoSpace.size())).append(": ");
-    boolean first = true;
-    for (Map.Entry<String, Long> e: dirsNoSpace.entrySet()) {
-      if (!first) {
-        sb.append(", ");
-      }
-      sb.append(e.getKey());
-      sb.append(" (");
-      sb.append(StringUtil.formatFileSize(e.getValue()));
-      sb.append(")");
-      first = false;
-    }
-    sb.append(". Disk space threshold is set to ");
-    sb.append(StringUtil.formatFileSize(getThreshold()));
-    sb.append(".");
-    return sb.toString();
+  private String getPauseReason(@NotNull final Map<String, Long> dirsNoSpace, final long threshold) {
+    return "Insufficient disk space in the following " +
+            pluralize("directory", dirsNoSpace.size()) + ": " +
+            dirsNoSpace.entrySet().stream()
+                    .map(entry -> entry.getKey() + " (" + formatFileSize(entry.getValue()) + ")")
+                    .collect(Collectors.joining(", ")) +
+            ". Disk space threshold is set to " +
+            formatFileSize(threshold) +
+            ".";
   }
 }
