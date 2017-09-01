@@ -23,6 +23,7 @@ import jetbrains.buildServer.users.UserModel;
 import jetbrains.buildServer.util.Dates;
 import jetbrains.buildServer.util.TestFor;
 import org.jmock.Expectations;
+import org.testng.Assert;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
@@ -55,7 +56,7 @@ public class QueueStateManagerImplTest extends BaseJMockTestCase {
   }
 
   @Test
-  public void testReadQueueState_NoUser() throws Exception {
+  public void testReadQueueState_NoUser() {
     final boolean expectedQueueState = true;
     final Date expectedDate = Dates.today();
     final String expectedReason  = "Some expected reason";
@@ -84,51 +85,32 @@ public class QueueStateManagerImplTest extends BaseJMockTestCase {
     }});
 
     final QueueState queueState = myQueueStateManager.readQueueState();
-    assertEquals(expectedQueueState, queueState.isQueueEnabled());
+    Assert.assertEquals(expectedQueueState, queueState.isQueueEnabled());
     assertNull(queueState.getUser());
-    assertEquals(expectedDate, queueState.getTimestamp());
-    assertEquals(expectedReason, queueState.getReason());
+    Assert.assertEquals(expectedDate, queueState.getTimestamp());
+    Assert.assertEquals(expectedReason, queueState.getReason());
   }
 
   @Test
-  public void testReadQueueState_User() throws Exception {
+  public void testReadQueueState_User() {
     final boolean expectedQueueState = false;
     final Date expectedDate = Dates.today();
     final String expectedReason  = "Some expected reason";
     final long userId = 0L;
     final Actor expectedActor = Actor.USER;
 
-    m.checking(new Expectations() {{
-      oneOf(mySettingsManager).isQueueEnabled();
-      will(returnValue(expectedQueueState));
-
-      oneOf(mySettingsManager).getQueueStateChangedBy();
-      will(returnValue(userId));
-
-      oneOf(myUserModel).findUserById(userId);
-      will(returnValue(myUser));
-
-      oneOf(mySettingsManager).getQueueStateChangedOn();
-      will(returnValue(expectedDate));
-
-      oneOf(mySettingsManager).getQueueStateChangedReason();
-      will(returnValue(expectedReason));
-
-      oneOf(mySettingsManager).getQueueStateChangedActor();
-      will(returnValue(expectedActor));
-
-    }});
+    addSingleReadExpectations(expectedQueueState, expectedDate, expectedReason, userId, expectedActor);
 
     final QueueState queueState = myQueueStateManager.readQueueState();
-    assertEquals(expectedQueueState, queueState.isQueueEnabled());
+    Assert.assertEquals(expectedQueueState, queueState.isQueueEnabled());
     assertNotNull(queueState.getUser());
-    assertEquals(myUser, queueState.getUser());
-    assertEquals(expectedDate, queueState.getTimestamp());
-    assertEquals(expectedReason, queueState.getReason());
+    Assert.assertEquals(myUser, queueState.getUser());
+    Assert.assertEquals(expectedDate, queueState.getTimestamp());
+    Assert.assertEquals(expectedReason, queueState.getReason());
   }
 
   @Test
-  public void testWriteQueueState() throws Exception {
+  public void testWriteQueueState() {
     final boolean newQueueState = true;
     final Date newDate = Dates.yesterday();
     final String newReason  = "Some new reason";
@@ -153,7 +135,7 @@ public class QueueStateManagerImplTest extends BaseJMockTestCase {
 
   @Test
   @TestFor (issues = "TW-10787")
-  public void testWriteQueueState_NullUser() throws Exception {
+  public void testWriteQueueState_NullUser() {
     final boolean newQueueState = true;
     final Date newDate = Dates.yesterday();
     final String newReason = "Some new reason";
@@ -169,5 +151,112 @@ public class QueueStateManagerImplTest extends BaseJMockTestCase {
     }});
 
     myQueueStateManager.writeQueueState(stateToWrite);
+  }
+
+  @Test
+  @TestFor(issues = "TW-51387")
+  public void testResolveUserOnlyOnce() {
+    final boolean expectedQueueState = false;
+    final Date expectedDate = Dates.today();
+    final String expectedReason  = "Some expected reason";
+    final long userId = 0L;
+    final Actor expectedActor = Actor.USER;
+
+    m.checking(new Expectations() {{
+      oneOf(mySettingsManager).isQueueEnabled();
+      will(returnValue(expectedQueueState));
+
+      oneOf(mySettingsManager).getQueueStateChangedBy();
+      will(returnValue(userId));
+
+      oneOf(myUserModel).findUserById(userId);
+      will(returnValue(myUser));
+
+      exactly(2).of(mySettingsManager).getQueueStateChangedOn();
+      will(returnValue(expectedDate));
+
+      oneOf(mySettingsManager).getQueueStateChangedReason();
+      will(returnValue(expectedReason));
+
+      oneOf(mySettingsManager).getQueueStateChangedActor();
+      will(returnValue(expectedActor));
+
+    }});
+
+    myQueueStateManager.readQueueState();
+    // readQueueState does not produce second call to user model
+    myQueueStateManager.readQueueState();
+  }
+
+  @Test
+  @TestFor(issues = "TW-51387")
+  public void testResolveUserAfterStateChange() {
+    final boolean expectedQueueState = true;
+    final Date expectedDate = Dates.yesterday();
+    final String expectedReason  = "Some expected reason";
+    final long userId = 0L;
+    final Actor expectedActor = Actor.USER;
+
+
+    addSingleReadExpectations(expectedQueueState, expectedDate, expectedReason, userId, expectedActor);
+    
+    final boolean newQueueState = false;
+    final Date newDate = Dates.today();
+    final String newReason  = "Some new reason";
+    final long newUserId = 12345L;
+
+    final QueueState stateToWrite = new QueueStateImpl(newQueueState, myUser, newReason, newDate, Actor.USER);
+
+    myQueueStateManager.readQueueState();
+
+    // expectation that second call of readQueueState only produces timestamp read
+    m.checking(new Expectations() {{
+      oneOf(mySettingsManager).getQueueStateChangedOn();
+      will(returnValue(expectedDate));
+    }});
+
+    myQueueStateManager.readQueueState();
+
+    m.checking(new Expectations() {{
+      oneOf(myUser).getId();
+      will(returnValue(newUserId));
+      
+      oneOf(mySettingsManager).setQueueEnabled(newQueueState);
+      oneOf(mySettingsManager).setQueueStateChangedBy(newUserId);
+      oneOf(mySettingsManager).setQueueStateChangedReason(newReason);
+      oneOf(mySettingsManager).setQueueStateChangedOn(newDate);
+      oneOf(mySettingsManager).setQueueStateChangedActor(Actor.USER);
+    }});
+
+    myQueueStateManager.writeQueueState(stateToWrite);
+
+    addSingleReadExpectations(expectedQueueState, expectedDate, expectedReason, newUserId, expectedActor);
+    myQueueStateManager.readQueueState();
+  }
+
+  private void addSingleReadExpectations(boolean expectedQueueState,
+                                         final Date expectedDate,
+                                         final String expectedReason,
+                                         long userId,
+                                         final Actor expectedActor) {
+    m.checking(new Expectations() {{
+      oneOf(mySettingsManager).isQueueEnabled();
+      will(returnValue(expectedQueueState));
+
+      oneOf(mySettingsManager).getQueueStateChangedBy();
+      will(returnValue(userId));
+
+      oneOf(myUserModel).findUserById(userId);
+      will(returnValue(myUser));
+
+      oneOf(mySettingsManager).getQueueStateChangedOn();
+      will(returnValue(expectedDate));
+
+      oneOf(mySettingsManager).getQueueStateChangedReason();
+      will(returnValue(expectedReason));
+
+      oneOf(mySettingsManager).getQueueStateChangedActor();
+      will(returnValue(expectedActor));
+    }});
   }
 }
