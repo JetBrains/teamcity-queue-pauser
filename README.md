@@ -1,5 +1,7 @@
 
-License
-=======
-You may do what ever you like with those sources. 
-or I could also say the license is MIT.
+[![official JetBrains project](http://jb.gg/badges/official-flat-square.svg)](https://confluence.jetbrains.com/display/ALL/JetBrains+on+GitHub)
+
+TeamCity.QueueManager
+========================
+
+Queue manager plugin for TeamCity
