@@ -7,6 +7,7 @@ import jetbrains.buildServer.queueManager.settings.QueueStateImpl;
 import jetbrains.buildServer.queueManager.settings.QueueStateManager;
 import jetbrains.buildServer.serverSide.BuildServerAdapter;
 import jetbrains.buildServer.serverSide.BuildServerListener;
+import jetbrains.buildServer.serverSide.ServerResponsibility;
 import jetbrains.buildServer.serverSide.TeamCityProperties;
 import jetbrains.buildServer.serverSide.impl.DiskSpaceWatcher;
 import jetbrains.buildServer.util.Alarm;
@@ -61,14 +62,19 @@ public class FreeSpaceQueuePauser {
   @NotNull
   private final DiskSpaceWatcher myDiskSpaceWatcher;
 
+  @NotNull
+  private final ServerResponsibility myResponsibility;
+
   private Alarm myWatcher = null;
 
   public FreeSpaceQueuePauser(@NotNull final EventDispatcher<BuildServerListener> dispatcher,
                               @NotNull final QueueStateManager queueStateManager,
-                              @NotNull final DiskSpaceWatcher diskSpaceWatcher) {
+                              @NotNull final DiskSpaceWatcher diskSpaceWatcher,
+                              @NotNull final ServerResponsibility responsibility) {
     myDispatcher = dispatcher;
     myQueueStateManager = queueStateManager;
     myDiskSpaceWatcher = diskSpaceWatcher;
+    myResponsibility = responsibility;
     initWatcher();
   }
 
@@ -89,15 +95,15 @@ public class FreeSpaceQueuePauser {
   }
 
   private boolean isEnabled() {
-    return TeamCityProperties.getBooleanOrTrue(KEY_AUTO_PAUSE);
+    return TeamCityProperties.getBooleanOrTrue(KEY_AUTO_PAUSE) && myResponsibility.canManageBuilds();
   }
 
-  boolean isResumingEnabled() {
+  boolean isAutoResumingEnabled() {
     return TeamCityProperties.getBooleanOrTrue(KEY_AUTO_RESUME);
   }
 
   private boolean canResume(@NotNull final QueueState state, @NotNull final Map<String, Long> dirsNoSpace) {
-    return isResumingEnabled() && ACTOR.equals(state.getActor()) && dirsNoSpace.isEmpty();
+    return isAutoResumingEnabled() && ACTOR.equals(state.getActor()) && dirsNoSpace.isEmpty();
   }
 
   private long getThreshold() {

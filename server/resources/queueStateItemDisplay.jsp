@@ -8,9 +8,11 @@
 <jsp:useBean id="healthStatusItem" type="jetbrains.buildServer.serverSide.healthStatus.HealthStatusItem" scope="request"/>
 <%--@elvariable id="queueState" type="jetbrains.buildServer.queueManager.settings.QueueState"--%>
 <%--@elvariable id="allowManualResume" type="java.lang.Boolean"--%>
+<%--@elvariable id="serverAllowsResuming" type="java.lang.Boolean"--%>
 <c:set var="queueState" value="${healthStatusItem.additionalData['QUEUE_STATE']}"/>
 <c:set var="user" value="${queueState.user}"/>
 <c:set var="allowManualResume" value="${healthStatusItem.additionalData['allowManualResume']}"/>
+<c:set var="serverAllowsResuming" value="${healthStatusItem.additionalData['serverAllowsResuming']}"/>
 <%
   final SUser currentUser = SessionUser.getUser(request);
   final Map<String, Object> additionalData = healthStatusItem.getAdditionalData();
@@ -42,28 +44,30 @@
 ${action}${user}${date}<c:if test="${not empty reason}">&nbsp;<bs:out value="${reason}"/></c:if><br/>
 No builds will be started until the queue is resumed.<bs:help file="Build+Queue" anchor="Pausing%2FResumingBuildQueue"/>
 
-<c:set var="allowResume">
-  <%
-    if (currentUser != null && currentUser.isSystemAdministratorRoleGranted()) {
-  %>
-  true
-  <%
-  } else {
-  %>
-  <authz:authorize allPermissions="ENABLE_DISABLE_AGENT">
+<c:if test="${serverAllowsResuming}">
+  <c:set var="allowResume">
+    <%
+      if (currentUser != null && currentUser.isSystemAdministratorRoleGranted()) {
+    %>
+    true
+    <%
+    } else {
+    %>
+    <authz:authorize allPermissions="ENABLE_DISABLE_AGENT">
           <jsp:attribute name="ifAccessGranted">
             ${allowManualResume}
           </jsp:attribute>
-  </authz:authorize>
-  <%
-    }
-  %>
-</c:set>
+    </authz:authorize>
+    <%
+      }
+    %>
+  </c:set>
 
-<c:if test="${allowResume}">
-  <div style="float:right">
-    <a class="btn btn_mini" href="#" onclick="BS.QueueStateActions.resumeQueue(); return false">Resume</a>
-  </div>
+  <c:if test="${allowResume}">
+    <div style="float:right">
+      <a class="btn btn_mini" href="#" onclick="BS.QueueStateActions.resumeQueue(); return false">Resume</a>
+    </div>
+  </c:if>
 </c:if>
 
 

@@ -1,10 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="EntryPointsManager">
-    <entry_points version="2.0" />
     <list size="1">
       <item index="0" class="java.lang.String" itemvalue="jetbrains.buildServer.Mocked" />
     </list>
+    <writeAnnotations>
+      <writeAnnotation name="jetbrains.buildServer.Mocked" />
+    </writeAnnotations>
   </component>
   <component name="IdProvider" IDEtalkID="62186A52A1A07991AF0EFE51117755A4" />
   <component name="JavadocGenerationManager">
@@ -31,7 +33,7 @@
   <component name="ProjectResources">
     <default-html-doctype>http://www.w3.org/1999/xhtml</default-html-doctype>
   </component>
-  <component name="ProjectRootManager" version="2" languageLevel="JDK_1_8" default="false" assert-keyword="true" jdk-15="true" project-jdk-name="1.8" project-jdk-type="JavaSDK">
+  <component name="ProjectRootManager" version="2" languageLevel="JDK_1_8" default="false" project-jdk-name="1.8" project-jdk-type="JavaSDK">
     <output url="file://$PROJECT_DIR$/out" />
   </component>
 </project>

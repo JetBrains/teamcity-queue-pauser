@@ -6,6 +6,7 @@ import jetbrains.buildServer.queueManager.settings.QueueState;
 import jetbrains.buildServer.queueManager.settings.QueueStateManager;
 import jetbrains.buildServer.serverSide.BuildServerListener;
 import jetbrains.buildServer.serverSide.FileWatchingPropertiesModel;
+import jetbrains.buildServer.serverSide.ServerResponsibility;
 import jetbrains.buildServer.serverSide.TeamCityProperties;
 import jetbrains.buildServer.serverSide.impl.DiskSpaceWatcher;
 import jetbrains.buildServer.util.EventDispatcher;
@@ -43,6 +44,8 @@ public class FreeSpaceQueuePauserTest extends BaseTestCase {
 
   private QueueState myQueueState;
 
+  private ServerResponsibility myResponsibility;
+
   /**
    * class under test
    */
@@ -63,7 +66,8 @@ public class FreeSpaceQueuePauserTest extends BaseTestCase {
     m.checking(new Expectations() {{
       allowing(myDispatcher);
     }});
-    pauser = new FreeSpaceQueuePauser(myDispatcher, myQueueStateManager, myDiskSpaceWatcher);
+    myResponsibility = m.mock(ServerResponsibility.class);
+    pauser = new FreeSpaceQueuePauser(myDispatcher, myQueueStateManager, myDiskSpaceWatcher, myResponsibility);
   }
 
   private void invoke() throws Exception {
@@ -87,6 +91,9 @@ public class FreeSpaceQueuePauserTest extends BaseTestCase {
 
       allowing(myDiskSpaceWatcher).getDirsNoSpace();
       will(returnValue(Collections.emptyMap()));
+
+      allowing(myResponsibility).canManageBuilds();
+      will(returnValue(true));
     }});
     invoke();
     m.assertIsSatisfied();
@@ -105,6 +112,9 @@ public class FreeSpaceQueuePauserTest extends BaseTestCase {
 
       allowing(myDiskSpaceWatcher).getDirsNoSpace();
       will(returnValue(Collections.emptyMap()));
+
+      allowing(myResponsibility).canManageBuilds();
+      will(returnValue(true));
     }});
     invoke();
     m.assertIsSatisfied();
@@ -150,6 +160,9 @@ public class FreeSpaceQueuePauserTest extends BaseTestCase {
 
       oneOf(myDiskSpaceWatcher).getDirsNoSpace();
       will(returnValue(paths));
+
+      allowing(myResponsibility).canManageBuilds();
+      will(returnValue(true));
     }});
   }
 
@@ -178,6 +191,9 @@ public class FreeSpaceQueuePauserTest extends BaseTestCase {
       oneOf(myDiskSpaceWatcher).getDirsNoSpace();
       will(returnValue(Collections.emptyMap()));
 
+      allowing(myResponsibility).canManageBuilds();
+      will(returnValue(true));
+
     }});
     invoke();
     m.assertIsSatisfied();
@@ -204,6 +220,9 @@ public class FreeSpaceQueuePauserTest extends BaseTestCase {
 
       oneOf(myQueueState).getActor();
       will(returnValue(Actor.FREE_SPACE_QUEUE_PAUSER));
+
+      allowing(myResponsibility).canManageBuilds();
+      will(returnValue(true));
 
       exactly(1).of(same(myQueueStateManager)).method("writeQueueState");
 
@@ -233,6 +252,9 @@ public class FreeSpaceQueuePauserTest extends BaseTestCase {
 
       oneOf(myQueueState).getActor();
       will(returnValue(Actor.USER));
+
+      allowing(myResponsibility).canManageBuilds();
+      will(returnValue(true));
 
     }});
     invoke();

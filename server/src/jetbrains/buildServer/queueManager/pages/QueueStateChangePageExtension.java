@@ -18,6 +18,7 @@ package jetbrains.buildServer.queueManager.pages;
 
 import jetbrains.buildServer.queueManager.PluginConstants;
 import jetbrains.buildServer.queueManager.settings.QueueStateManager;
+import jetbrains.buildServer.serverSide.ServerResponsibility;
 import jetbrains.buildServer.serverSide.auth.Permission;
 import jetbrains.buildServer.serverSide.auth.SecurityContext;
 import jetbrains.buildServer.users.SUser;
@@ -50,15 +51,20 @@ public class QueueStateChangePageExtension extends SimplePageExtension {
   private final QueueStateManager myQueueStateManager;
 
   @NotNull
+  private final ServerResponsibility myResponsibility;
+
+  @NotNull
   private final SecurityContext mySecurityContext;
 
   public QueueStateChangePageExtension(@NotNull final PagePlaces pagePlaces,
                                        @NotNull final PluginDescriptor descriptor,
                                        @NotNull final SecurityContext securityContext,
-                                       @NotNull final QueueStateManager queueStateManager) {
+                                       @NotNull final QueueStateManager queueStateManager,
+                                       @NotNull final ServerResponsibility responsibility) {
     super(pagePlaces);
     mySecurityContext = securityContext;
     myQueueStateManager = queueStateManager;
+    myResponsibility = responsibility;
     setPlaceId(PlaceId.BEFORE_CONTENT);
     setPluginName(descriptor.getPluginName());
     setIncludeUrl(descriptor.getPluginResourcesPath(EXTENSION_INCLUDE_URL));
@@ -67,7 +73,8 @@ public class QueueStateChangePageExtension extends SimplePageExtension {
   @Override
   public boolean isAvailable(@NotNull final HttpServletRequest request) {
     final SUser user = (SUser) mySecurityContext.getAuthorityHolder().getAssociatedUser();
-    return WebUtil.getPathWithoutAuthenticationType(WebUtil.getPathWithoutContext(request, WebUtil.getOriginalRequestUrl(request))).startsWith(EXTENSION_AVAILABILITY_URL)
+    return myResponsibility.canManageBuilds()
+            && WebUtil.getPathWithoutAuthenticationType(WebUtil.getPathWithoutContext(request, WebUtil.getOriginalRequestUrl(request))).startsWith(EXTENSION_AVAILABILITY_URL)
             && user != null
             && user.isPermissionGrantedGlobally(Permission.ENABLE_DISABLE_AGENT);
   }

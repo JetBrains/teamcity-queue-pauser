@@ -61,7 +61,7 @@ public class StartStopWaitPreconditionTest extends BaseJMockTestCase {
   }
 
   @Test
-  public void testCanStart_Yes() throws Exception {
+  public void testCanStart_Yes() {
     m.checking(new Expectations() {{
       oneOf(myQueueStateManager).readQueueState();
       will(returnValue(myState));
@@ -75,7 +75,7 @@ public class StartStopWaitPreconditionTest extends BaseJMockTestCase {
   }
 
   @Test
-  public void testCanStart_No() throws Exception {
+  public void testCanStart_No() {
     m.checking(new Expectations() {{
       oneOf(myQueueStateManager).readQueueState();
       will(returnValue(myState));

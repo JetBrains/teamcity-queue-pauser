@@ -21,6 +21,7 @@ import jetbrains.buildServer.queueManager.settings.Actor;
 import jetbrains.buildServer.queueManager.settings.QueueState;
 import jetbrains.buildServer.queueManager.settings.QueueStateImpl;
 import jetbrains.buildServer.queueManager.settings.QueueStateManager;
+import jetbrains.buildServer.serverSide.ServerResponsibility;
 import jetbrains.buildServer.serverSide.audit.AuditLogFactory;
 import jetbrains.buildServer.serverSide.auth.Permission;
 import jetbrains.buildServer.serverSide.auth.SecurityContext;
@@ -58,26 +59,33 @@ public final class ChangeQueueStateAction implements ControllerAction {
   @NotNull
   private final AuditLogFactory myLogFactory;
 
+  @NotNull
+  private final ServerResponsibility myResponsibility;
+
   public ChangeQueueStateAction(@NotNull final QueueStateManager queueStateManager,
                                 @NotNull final QueueStateController queueStateController,
                                 @NotNull final SecurityContext securityContext,
-                                @NotNull final AuditLogFactory logFactory) {
+                                @NotNull final AuditLogFactory logFactory,
+                                @NotNull final ServerResponsibility responsibility) {
     myQueueStateManager = queueStateManager;
     mySecurityContext = securityContext;
     myLogFactory = logFactory;
+    myResponsibility = responsibility;
     queueStateController.registerAction(this);
   }
 
   public boolean canProcess(@NotNull final HttpServletRequest request) {
     final SUser user = getUser();
-    return  user != null
+    return  myResponsibility.canManageBuilds()
+            && user != null
             && user.isPermissionGrantedGlobally(Permission.ENABLE_DISABLE_AGENT)
             && request.getParameter(PARAM_NEW_QUEUE_STATE) != null
             && request.getParameter(PARAM_STATE_CHANGE_REASON) != null;
   }
 
   public void process(@NotNull final HttpServletRequest request,
-                      @NotNull final HttpServletResponse response, @Nullable final Element ajaxResponse) {
+                      @NotNull final HttpServletResponse response,
+                      @Nullable final Element ajaxResponse) {
     boolean newQueueState = PropertiesUtil.getBoolean(request.getParameter(PARAM_NEW_QUEUE_STATE));
     final String comment = request.getParameter(PARAM_STATE_CHANGE_REASON);
     final SUser user = getUser();

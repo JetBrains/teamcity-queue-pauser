@@ -19,6 +19,7 @@ package jetbrains.buildServer.queueManager.server;
 import jetbrains.buildServer.queueManager.settings.Actor;
 import jetbrains.buildServer.queueManager.settings.QueueState;
 import jetbrains.buildServer.queueManager.settings.QueueStateManager;
+import jetbrains.buildServer.serverSide.ServerResponsibility;
 import jetbrains.buildServer.serverSide.healthStatus.*;
 import jetbrains.buildServer.web.openapi.PagePlaces;
 import jetbrains.buildServer.web.openapi.PluginDescriptor;
@@ -53,12 +54,17 @@ public class QueueStateHealthReport extends HealthStatusReport {
   @NotNull
   private final FreeSpaceQueuePauser myFreeSpaceQueuePauser;
 
+  @NotNull
+  private final ServerResponsibility myResponsibility;
+
   public QueueStateHealthReport(@NotNull final PluginDescriptor pluginDescriptor,
                                 @NotNull final QueueStateManager queueStateManager,
                                 @NotNull final PagePlaces pagePlaces,
-                                @NotNull final FreeSpaceQueuePauser freeSpaceQueuePauser) {
+                                @NotNull final FreeSpaceQueuePauser freeSpaceQueuePauser,
+                                @NotNull final ServerResponsibility responsibility) {
     myQueueStateManager = queueStateManager;
     myFreeSpaceQueuePauser = freeSpaceQueuePauser;
+    myResponsibility = responsibility;
     myCategory = new ItemCategory(CATEGORY_ID, CATEGORY_NAME, ItemSeverity.ERROR);
     final HealthStatusItemPageExtension myPEx = new HealthStatusItemPageExtension(CATEGORY_ID, pagePlaces) {
       @Override
@@ -101,7 +107,8 @@ public class QueueStateHealthReport extends HealthStatusReport {
     if (!queueState.isQueueEnabled()) {
       final Map<String, Object> myData = new HashMap<>();
       myData.put("QUEUE_STATE", queueState);
-      myData.put("allowManualResume", queueState.getActor().equals(Actor.USER) || !myFreeSpaceQueuePauser.isResumingEnabled());
+      myData.put("allowManualResume", queueState.getActor().equals(Actor.USER) || !myFreeSpaceQueuePauser.isAutoResumingEnabled());
+      myData.put("serverAllowsResuming", myResponsibility.canManageBuilds());
       resultConsumer.consumeGlobal(new HealthStatusItem(CATEGORY_ID, myCategory, myData));
     }
   }
