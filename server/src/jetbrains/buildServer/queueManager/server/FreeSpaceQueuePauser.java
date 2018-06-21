@@ -1,5 +1,6 @@
 package jetbrains.buildServer.queueManager.server;
 
+import jetbrains.buildServer.controllers.healthStatus.GlobalHealthItemsTracker;
 import jetbrains.buildServer.log.Loggers;
 import jetbrains.buildServer.queueManager.settings.Actor;
 import jetbrains.buildServer.queueManager.settings.QueueState;
@@ -63,6 +64,9 @@ public class FreeSpaceQueuePauser {
   private final DiskSpaceWatcher myDiskSpaceWatcher;
 
   @NotNull
+  private final GlobalHealthItemsTracker myGlobalHealthItemsTracker;
+
+  @NotNull
   private final ServerResponsibility myResponsibility;
 
   private Alarm myWatcher = null;
@@ -70,10 +74,12 @@ public class FreeSpaceQueuePauser {
   public FreeSpaceQueuePauser(@NotNull final EventDispatcher<BuildServerListener> dispatcher,
                               @NotNull final QueueStateManager queueStateManager,
                               @NotNull final DiskSpaceWatcher diskSpaceWatcher,
-                              @NotNull final ServerResponsibility responsibility) {
+                              @NotNull final ServerResponsibility responsibility,
+                              @NotNull final GlobalHealthItemsTracker globalHealthItemsTracker) {
     myDispatcher = dispatcher;
     myQueueStateManager = queueStateManager;
     myDiskSpaceWatcher = diskSpaceWatcher;
+    myGlobalHealthItemsTracker = globalHealthItemsTracker;
     myResponsibility = responsibility;
     initWatcher();
   }
@@ -122,6 +128,7 @@ public class FreeSpaceQueuePauser {
           final String pauseReason = getPauseReason(dirsNoSpace, threshold);
           final QueueState newState = new QueueStateImpl(false, null, pauseReason, new Date(), ACTOR);
           myQueueStateManager.writeQueueState(newState);
+          myGlobalHealthItemsTracker.recalculate();
           Loggers.SERVER.warn("Build queue was automatically paused. " + pauseReason);
         }
       } else {
@@ -130,6 +137,7 @@ public class FreeSpaceQueuePauser {
           final String resumeReason = "Queue was automatically enabled as disk space became available";
           final QueueState newState = new QueueStateImpl(true, null, resumeReason, new Date(), ACTOR);
           myQueueStateManager.writeQueueState(newState);
+          myGlobalHealthItemsTracker.recalculate();
           Loggers.SERVER.warn(resumeReason);
         }
       }

@@ -1,6 +1,7 @@
 package jetbrains.buildServer.queueManager.server;
 
 import jetbrains.buildServer.BaseTestCase;
+import jetbrains.buildServer.controllers.healthStatus.GlobalHealthItemsTracker;
 import jetbrains.buildServer.queueManager.settings.Actor;
 import jetbrains.buildServer.queueManager.settings.QueueState;
 import jetbrains.buildServer.queueManager.settings.QueueStateManager;
@@ -46,9 +47,8 @@ public class FreeSpaceQueuePauserTest extends BaseTestCase {
 
   private ServerResponsibility myResponsibility;
 
-  /**
-   * class under test
-   */
+  private GlobalHealthItemsTracker myTracker;
+
   private FreeSpaceQueuePauser pauser;
 
   @BeforeMethod
@@ -63,11 +63,13 @@ public class FreeSpaceQueuePauserTest extends BaseTestCase {
     myDispatcher = m.mock(EventDispatcher.class);
     myQueueState = m.mock(QueueState.class);
     myQueueStateManager = m.mock(QueueStateManager.class);
+    myTracker = m.mock(GlobalHealthItemsTracker.class);
+    myResponsibility = m.mock(ServerResponsibility.class);
+
     m.checking(new Expectations() {{
       allowing(myDispatcher);
     }});
-    myResponsibility = m.mock(ServerResponsibility.class);
-    pauser = new FreeSpaceQueuePauser(myDispatcher, myQueueStateManager, myDiskSpaceWatcher, myResponsibility);
+    pauser = new FreeSpaceQueuePauser(myDispatcher, myQueueStateManager, myDiskSpaceWatcher, myResponsibility, myTracker);
   }
 
   private void invoke() throws Exception {
@@ -169,6 +171,8 @@ public class FreeSpaceQueuePauserTest extends BaseTestCase {
   private void setupExpectedQueuePause() {
     m.checking(new Expectations() {{
       oneOf(myQueueStateManager).writeQueueState(with(any(QueueState.class)));
+
+      oneOf(myTracker).recalculate();
     }});
   }
 
@@ -225,6 +229,8 @@ public class FreeSpaceQueuePauserTest extends BaseTestCase {
       will(returnValue(true));
 
       exactly(1).of(same(myQueueStateManager)).method("writeQueueState");
+
+      oneOf(myTracker).recalculate();
 
     }});
     invoke();
