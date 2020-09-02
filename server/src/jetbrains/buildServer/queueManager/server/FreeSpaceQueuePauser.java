@@ -150,7 +150,7 @@ public class FreeSpaceQueuePauser {
       } else {
         // queue is disabled. try to resume
         if (canResume(qs, dirsNoSpace)) {
-          final String resumeReason = "Queue was automatically enabled as disk space became available";
+          final String resumeReason = "Queue was automatically unpaused as the disk space became available";
           final QueueState newState = new QueueStateImpl(true, null, resumeReason, new Date(), ACTOR);
           myQueueStateManager.writeQueueState(newState);
           myGlobalHealthItemsTracker.recalculate();
