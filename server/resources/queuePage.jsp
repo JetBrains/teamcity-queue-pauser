@@ -18,6 +18,7 @@
 <%@ include file="/include.jsp" %>
 <%@ page import="jetbrains.buildServer.queueManager.PluginConstants" %>
 <%@ page import="jetbrains.buildServer.queueManager.settings.Actor" %>
+<%@ page import="jetbrains.buildServer.web.util.WebUtil" %>
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 
 <c:set var="PARAM_NEW_QUEUE_STATE" value="<%=PluginConstants.WEB.PARAM_NEW_QUEUE_STATE%>"/>
@@ -39,83 +40,108 @@
 
 <c:url var="actionUrl" value="${QUEUE_ACTIONS_URL}"/>
 
-<script type="text/javascript">
-  BS.ChangeQueueStateDialog = OO.extend(BS.AbstractWebForm, OO.extend(BS.AbstractModalDialog, {
-    formElement: function() {
-      return $('changeQueueStateForm');
-    },
+<c:set var="isSakuraPlugin" value="${not empty param.pluginUIContext}"/>
 
-    getContainer: function() {
-      return $('changeQueueStateFormDialog');
-    },
+<bs:refreshable containerId="pause-build-queue" pageUrl="${pageUrl}">
+  <script type="text/javascript">
+    BS.ChangeQueueStateDialog = OO.extend(BS.AbstractWebForm, OO.extend(BS.AbstractModalDialog, {
+      formElement: function() {
+        return $('changeQueueStateForm');
+      },
 
-    showDialog: function() {
-      this.formElement().${PARAM_STATE_CHANGE_REASON}.value = this.formElement().${PARAM_STATE_CHANGE_REASON}.defaultValue;
-      this.showCentered();
-      this.formElement().${PARAM_STATE_CHANGE_REASON}.focus();
-      this.formElement().${PARAM_STATE_CHANGE_REASON}.select();
+      getContainer: function() {
+        return $('changeQueueStateFormDialog');
+      },
 
-      var dialogTitle;
-      var dialogSubmitButtonTitle;
-      <c:choose>
-      <c:when test="${queueIsActive}">
-      dialogTitle = "Pause build queue";
-      dialogSubmitButtonTitle = "Pause";
-      </c:when>
-      <c:otherwise>
-      dialogTitle = "Resume build queue";
-      dialogSubmitButtonTitle = "Resume";
-      </c:otherwise>
-      </c:choose>
+      showDialog: function() {
+        this.formElement().${PARAM_STATE_CHANGE_REASON}.value = this.formElement().${PARAM_STATE_CHANGE_REASON}.defaultValue;
+        this.showCentered();
+        this.formElement().${PARAM_STATE_CHANGE_REASON}.focus();
+        this.formElement().${PARAM_STATE_CHANGE_REASON}.select();
 
-      $j("#ChangeQueueStateSubmitButton").prop('value', dialogSubmitButtonTitle);
-      $j("#changeQueueStateFormTitle").html(dialogTitle);
+        var dialogTitle;
+        var dialogSubmitButtonTitle;
+        <c:choose>
+        <c:when test="${queueIsActive}">
+        dialogTitle = "Pause build queue";
+        dialogSubmitButtonTitle = "Pause";
+        </c:when>
+        <c:otherwise>
+        dialogTitle = "Resume build queue";
+        dialogSubmitButtonTitle = "Resume";
+        </c:otherwise>
+        </c:choose>
 
-      this.bindCtrlEnterHandler(this.submit.bind(this));
+        $j("#ChangeQueueStateSubmitButton").prop('value', dialogSubmitButtonTitle);
+        $j("#changeQueueStateFormTitle").html(dialogTitle);
 
-      return false;
-    },
+        this.bindCtrlEnterHandler(this.submit.bind(this));
 
-    submit: function() {
-      var val = this.formElement().${PARAM_STATE_CHANGE_REASON}.value;
-      var defaultVal = this.formElement().${PARAM_STATE_CHANGE_REASON}.defaultValue;
-      if (val === defaultVal) {
-        val = '';
-      }
-      this.formElement().${PARAM_STATE_CHANGE_REASON}.value = val;
-      BS.FormSaver.save(BS.ChangeQueueStateDialog, BS.ChangeQueueStateDialog.formElement().action, OO.extend(BS.SimpleListener, {
-        onCompleteSave: function(form, responseXML, err) {
-          BS.reload(true);
+        return false;
+      },
+
+      submit: function() {
+        var val = this.formElement().${PARAM_STATE_CHANGE_REASON}.value;
+        var defaultVal = this.formElement().${PARAM_STATE_CHANGE_REASON}.defaultValue;
+        if (val === defaultVal) {
+          val = '';
         }
-        // todo: onFailure or onException
-      }));
-      return false;
-    }
-  }));
+        this.formElement().${PARAM_STATE_CHANGE_REASON}.value = val;
+        BS.FormSaver.save(BS.ChangeQueueStateDialog, BS.ChangeQueueStateDialog.formElement().action, OO.extend(BS.SimpleListener, {
+          onCompleteSave: function(form, responseXML, err) {
+            if (${isSakuraPlugin}) {
+              // for some reason, wait reasons don't update right away, therefore the delay
+              setTimeout(() => ReactUI.updateQueue(), 500);
+              var container = document.getElementById('pause-build-queue');
+              if (container != null) {
+                container.refresh();
+              }
+              var healthItems = document.getElementById('globalHealthItems');
+              if (healthItems != null) {
+                healthItems.refresh();
+              }
+              BS.ChangeQueueStateDialog.close();
+            } else {
+              BS.reload(true);
+            }
+          }
+          // todo: onFailure or onException
+        }));
+        return false;
+      }
+    }));
+  </script>
 
   <c:if test="${queueState.actor eq ACTOR_USER || queueState.queueEnabled}">
-  $j('.quickLinks').append('<a href="#" class="quickLinksItem" onclick="BS.ChangeQueueStateDialog.showDialog();">${switchQueueStateActionText}</a>');
+    <c:choose>
+      <c:when test="${isSakuraPlugin}">
+        <ring:button onclick="BS.ChangeQueueStateDialog.showDialog();">${switchQueueStateActionText}</ring:button>
+      </c:when>
+      <c:otherwise>
+        <script>
+          $j('.quickLinks').append('<a href="#" class="quickLinksItem" onclick="BS.ChangeQueueStateDialog.showDialog();">${switchQueueStateActionText}</a>');
+        </script>
+      </c:otherwise>
+    </c:choose>
   </c:if>
-</script>
 
-
-<bs:modalDialog formId="changeQueueStateForm"
-                title="Disable queue"
-                action="${actionUrl}"
-                closeCommand="BS.ChangeQueueStateDialog.close();"
-                saveCommand="BS.ChangeQueueStateDialog.submit()">
-  <label for="${PARAM_STATE_CHANGE_REASON}">Reason:</label>
-  <textarea id="${PARAM_STATE_CHANGE_REASON}"
-            name="${PARAM_STATE_CHANGE_REASON}"
-            rows="3" cols="46" class="commentTextArea"
-            onkeyup="if (this.value.length > 140) this.value = this.value.substring(0, 140)"
-            onfocus="if (this.value == this.defaultValue) this.value = ''"
-            onblur="if (this.value == '') this.value='&lt;your comment here&gt;'">&lt;your comment here&gt;</textarea>
-  <input type="hidden" name="${PARAM_NEW_QUEUE_STATE}" value="${not queueIsActive}">
-  <div class="popupSaveButtonsBlock">
-    <forms:submit  label="Save" id="ChangeQueueStateSubmitButton"/>
-    <forms:cancel onclick="BS.ChangeQueueStateDialog.close()"/>
-    <forms:saving/>
-  </div>
-</bs:modalDialog>
-
+  <bs:modalDialog formId="changeQueueStateForm"
+                  title="Disable queue"
+                  action="${actionUrl}"
+                  closeCommand="BS.ChangeQueueStateDialog.close();"
+                  saveCommand="BS.ChangeQueueStateDialog.submit()">
+    <label for="${PARAM_STATE_CHANGE_REASON}">Reason:</label>
+    <textarea id="${PARAM_STATE_CHANGE_REASON}"
+              name="${PARAM_STATE_CHANGE_REASON}"
+              rows="3" cols="46" class="commentTextArea"
+              onkeyup="if (this.value.length > 140) this.value = this.value.substring(0, 140)"
+              onfocus="if (this.value == this.defaultValue) this.value = ''"
+              onblur="if (this.value == '') this.value='&lt;your comment here&gt;'">&lt;your comment here&gt;</textarea>
+    <input type="hidden" name="${PARAM_NEW_QUEUE_STATE}" value="${not queueIsActive}">
+    <div class="popupSaveButtonsBlock">
+      <forms:submit  label="Save" id="ChangeQueueStateSubmitButton"/>
+      <forms:cancel onclick="BS.ChangeQueueStateDialog.close()"/>
+      <forms:saving/>
+    </div>
+  </bs:modalDialog>
+</bs:refreshable>

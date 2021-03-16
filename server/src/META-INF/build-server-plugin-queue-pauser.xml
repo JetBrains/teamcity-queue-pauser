@@ -24,7 +24,7 @@
   <bean class="jetbrains.buildServer.queueManager.settings.SettingsManagerImpl"/>
   <bean class="jetbrains.buildServer.queueManager.settings.QueueStateManagerImpl"/>
   <bean class="jetbrains.buildServer.queueManager.server.StartStopWaitPrecondition"/>
-  <bean class="jetbrains.buildServer.queueManager.pages.QueueStateChangePageExtension" init-method="register"/>
+  <bean class="jetbrains.buildServer.queueManager.pages.QueueStateChangePageController"/>
   <bean class="jetbrains.buildServer.queueManager.server.QueueStateController"/>
   <bean class="jetbrains.buildServer.queueManager.server.ChangeQueueStateAction"/>
   <bean class="jetbrains.buildServer.queueManager.server.QueueStateHealthReport"/>
