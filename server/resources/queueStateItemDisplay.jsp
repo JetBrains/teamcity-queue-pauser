@@ -80,6 +80,24 @@ No builds will be started until the queue is resumed.<bs:help file="Build+Queue"
   </c:set>
 
   <c:if test="${allowResume}">
+    <script>
+      BS.QueueStateActions = {
+        url: window['base_uri'] + "/queueStartStop.html",
+        resumeQueue: function() {
+          var params = {
+            'newQueueState': 'true',
+            'stateChangeReason' : ''
+          };
+          //noinspection JSUnusedGlobalSymbols
+          BS.ajaxRequest(this.url, {
+            parameters: params,
+            onSuccess: function() {
+              window.location.reload();
+            }
+          });
+        }
+      };
+    </script>
     <div style="float:right">
       <a class="btn btn_mini" href="#" onclick="BS.QueueStateActions.resumeQueue(); return false">Resume</a>
     </div>

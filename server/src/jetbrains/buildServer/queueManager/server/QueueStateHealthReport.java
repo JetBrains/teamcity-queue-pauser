@@ -73,7 +73,6 @@ public class QueueStateHealthReport extends HealthStatusReport {
       }
     };
     myPEx.setIncludeUrl(pluginDescriptor.getPluginResourcesPath("queueStateItemDisplay.jsp"));
-    myPEx.addJsFile(pluginDescriptor.getPluginResourcesPath("/js/QueueStateActions.js"));
     myPEx.setVisibleOutsideAdminArea(true);
     myPEx.register();
   }
