@@ -20,7 +20,6 @@ import jetbrains.buildServer.controllers.healthStatus.GlobalHealthItemsTracker;
 import jetbrains.buildServer.log.Loggers;
 import jetbrains.buildServer.queueManager.settings.Actor;
 import jetbrains.buildServer.queueManager.settings.QueueState;
-import jetbrains.buildServer.queueManager.settings.QueueStateImpl;
 import jetbrains.buildServer.queueManager.settings.QueueStateManager;
 import jetbrains.buildServer.serverSide.BuildServerAdapter;
 import jetbrains.buildServer.serverSide.BuildServerListener;
@@ -142,7 +141,7 @@ public class FreeSpaceQueuePauser {
       if (qs.isQueueEnabled()) {
         if (!dirsNoSpace.isEmpty()) { // disable queue
           final String pauseReason = getPauseReason(dirsNoSpace, threshold);
-          final QueueState newState = new QueueStateImpl(false, null, pauseReason, new Date(), ACTOR);
+          final QueueState newState = new QueueState(false, null, pauseReason, new Date(), ACTOR);
           myQueueStateManager.writeQueueState(newState);
           myGlobalHealthItemsTracker.recalculate();
           Loggers.SERVER.warn("Build queue was automatically paused. " + pauseReason);
@@ -151,7 +150,7 @@ public class FreeSpaceQueuePauser {
         // queue is disabled. try to resume
         if (canResume(qs, dirsNoSpace)) {
           final String resumeReason = "Queue was automatically unpaused as the disk space became available";
-          final QueueState newState = new QueueStateImpl(true, null, resumeReason, new Date(), ACTOR);
+          final QueueState newState = new QueueState(true, null, resumeReason, new Date(), ACTOR);
           myQueueStateManager.writeQueueState(newState);
           myGlobalHealthItemsTracker.recalculate();
           Loggers.SERVER.warn(resumeReason);

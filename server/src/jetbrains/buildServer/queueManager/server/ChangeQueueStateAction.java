@@ -16,11 +16,9 @@
 
 package jetbrains.buildServer.queueManager.server;
 
-import jetbrains.buildServer.controllers.healthStatus.GlobalHealthItemsTracker;
 import jetbrains.buildServer.log.Loggers;
 import jetbrains.buildServer.queueManager.settings.Actor;
 import jetbrains.buildServer.queueManager.settings.QueueState;
-import jetbrains.buildServer.queueManager.settings.QueueStateImpl;
 import jetbrains.buildServer.queueManager.settings.QueueStateManager;
 import jetbrains.buildServer.serverSide.ServerResponsibility;
 import jetbrains.buildServer.serverSide.audit.AuditLogFactory;
@@ -63,26 +61,21 @@ public final class ChangeQueueStateAction implements ControllerAction {
   @NotNull
   private final ServerResponsibility myResponsibility;
 
-  @NotNull
-  private final GlobalHealthItemsTracker myGlobalHealthItemsTracker;
-
   public ChangeQueueStateAction(@NotNull final QueueStateManager queueStateManager,
                                 @NotNull final QueueStateController queueStateController,
                                 @NotNull final SecurityContext securityContext,
                                 @NotNull final AuditLogFactory logFactory,
-                                @NotNull final ServerResponsibility responsibility,
-                                @NotNull final GlobalHealthItemsTracker globalHealthItemsTracker) {
+                                @NotNull final ServerResponsibility responsibility) {
     myQueueStateManager = queueStateManager;
     mySecurityContext = securityContext;
     myLogFactory = logFactory;
-    myGlobalHealthItemsTracker = globalHealthItemsTracker;
     myResponsibility = responsibility;
     queueStateController.registerAction(this);
   }
 
   public boolean canProcess(@NotNull final HttpServletRequest request) {
     final SUser user = getUser();
-    return  myResponsibility.canManageBuilds()
+    return  myResponsibility.canProcessUserDataModificationRequests()
             && user != null
             && user.isPermissionGrantedGlobally(Permission.ENABLE_DISABLE_AGENT)
             && request.getParameter(PARAM_NEW_QUEUE_STATE) != null
@@ -96,7 +89,7 @@ public final class ChangeQueueStateAction implements ControllerAction {
     final String comment = request.getParameter(PARAM_STATE_CHANGE_REASON);
     final SUser user = getUser();
     final Date date = new Date();
-    final QueueState state = new QueueStateImpl(newQueueState, user, comment, date, Actor.USER);
+    final QueueState state = new QueueState(newQueueState, user, comment, date, Actor.USER);
     changeStateAndLog(state, request);
   }
 
@@ -119,7 +112,6 @@ public final class ChangeQueueStateAction implements ControllerAction {
     myLogFactory.createForServer().logUserAction(
             state.isQueueEnabled() ? BUILD_QUEUE_RESUMED: BUILD_QUEUE_PAUSED,
             state.getReason(), null);
-    myGlobalHealthItemsTracker.recalculate();
     Loggers.SERVER.warn(describeState(state, request));
   }
 

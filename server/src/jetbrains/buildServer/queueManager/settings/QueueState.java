@@ -27,19 +27,55 @@ import java.util.Date;
  *
  * @author Oleg Rybak (oleg.rybak@jetbrains.com)
  */
-public interface QueueState {
+public class QueueState {
 
-  boolean isQueueEnabled();
+  private final boolean myQueueEnabled;
 
   @Nullable
-  SUser getUser();
+  private final SUser myUser;
 
   @NotNull
-  String getReason();
+  private final String myReason;
 
   @NotNull
-  Date getTimestamp();
+  private final Date myTimestamp;
 
   @NotNull
-  Actor getActor();
+  private final Actor myActor;
+
+  public QueueState(boolean enabled,
+                    @Nullable SUser user,
+                    @NotNull String reason,
+                    @NotNull Date timestamp,
+                    @NotNull final Actor actor) {
+    myQueueEnabled = enabled;
+    myUser = user;
+    myReason = reason;
+    myTimestamp = timestamp;
+    myActor = actor;
+  }
+
+  public boolean isQueueEnabled() {
+    return myQueueEnabled;
+  }
+
+  @Nullable
+  public SUser getUser() {
+    return myUser;
+  }
+
+  @NotNull
+  public String getReason() {
+    return myReason;
+  }
+
+  @NotNull
+  public Date getTimestamp() {
+    return myTimestamp;
+  }
+
+  @NotNull
+  public Actor getActor() {
+    return myActor;
+  }
 }

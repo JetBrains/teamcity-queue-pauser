@@ -23,6 +23,7 @@ import jetbrains.buildServer.users.SUser;
 import jetbrains.buildServer.util.TestFor;
 import org.jmock.Expectations;
 import org.jmock.Mockery;
+import org.jmock.lib.legacy.ClassImposteriser;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
@@ -43,7 +44,9 @@ public class MessageViewerTest extends BaseTestCase {
   @Override
   protected void setUp() throws Exception {
     super.setUp();
-    m = new Mockery();
+    m = new Mockery() {{
+      setImposteriser(ClassImposteriser.INSTANCE);
+    }};
     myUser = m.mock(SUser.class);
     myQueueState = m.mock(QueueState.class);
   }

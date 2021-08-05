@@ -107,7 +107,7 @@ public class QueueStateHealthReport extends HealthStatusReport {
       final Map<String, Object> myData = new HashMap<>();
       myData.put("QUEUE_STATE", queueState);
       myData.put("allowManualResume", queueState.getActor().equals(Actor.USER) || !myFreeSpaceQueuePauser.isAutoResumingEnabled());
-      myData.put("serverAllowsResuming", myResponsibility.canManageBuilds());
+      myData.put("serverAllowsResuming", myResponsibility.canProcessUserDataModificationRequests());
       resultConsumer.consumeGlobal(new HealthStatusItem(CATEGORY_ID, myCategory, myData));
     }
   }

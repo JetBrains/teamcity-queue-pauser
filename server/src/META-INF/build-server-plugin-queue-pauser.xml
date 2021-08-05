@@ -20,14 +20,11 @@
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
        xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.0.xsd"
        default-autowire="constructor">
-
-  <bean class="jetbrains.buildServer.queueManager.settings.SettingsManagerImpl"/>
-  <bean class="jetbrains.buildServer.queueManager.settings.QueueStateManagerImpl"/>
-  <bean class="jetbrains.buildServer.queueManager.server.StartStopWaitPrecondition"/>
+  <bean class="jetbrains.buildServer.queueManager.server.QueuePausePrecondition"/>
   <bean class="jetbrains.buildServer.queueManager.pages.QueueStateChangePageController"/>
   <bean class="jetbrains.buildServer.queueManager.server.QueueStateController"/>
   <bean class="jetbrains.buildServer.queueManager.server.ChangeQueueStateAction"/>
   <bean class="jetbrains.buildServer.queueManager.server.QueueStateHealthReport"/>
   <bean class="jetbrains.buildServer.queueManager.server.FreeSpaceQueuePauser"/>
-
+  <bean class="jetbrains.buildServer.queueManager.settings.QueueStateManager"/>
 </beans>

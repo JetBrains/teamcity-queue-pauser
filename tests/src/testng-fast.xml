@@ -16,18 +16,12 @@
 
 <!DOCTYPE suite SYSTEM "http://testng.org/testng-1.0.dtd">
 <suite name="PLUGIN tests">
-
-  <test name="Settings Tests">
-    <classes>
-      <class name="jetbrains.buildServer.queueManager.settings.SettingsManagerImplTest"/>
-      <class name="jetbrains.buildServer.queueManager.settings.QueueStateManagerImplTest"/>
-    </classes>
-  </test>
-
   <test name="Server Tests">
     <classes>
-      <class name="jetbrains.buildServer.queueManager.server.StartStopWaitPreconditionTest"/>
+      <class name="jetbrains.buildServer.queueManager.server.MessageViewerTest"/>
+      <class name="jetbrains.buildServer.queueManager.QueuePauserIntegrationTest"/>
       <class name="jetbrains.buildServer.queueManager.server.FreeSpaceQueuePauserTest"/>
+      <class name="jetbrains.buildServer.queueManager.server.QueueStateManagerTest"/>
     </classes>
   </test>
 </suite>

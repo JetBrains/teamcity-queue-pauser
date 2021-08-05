@@ -31,7 +31,6 @@ import org.springframework.web.servlet.ModelAndView;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.util.Map;
 
 /**
  * Class {@code QueueStateChangePageController}
@@ -99,7 +98,7 @@ public class QueueStateChangePageController extends BaseController {
 
   private boolean isEnoughPermissions() {
     final SUser user = (SUser) mySecurityContext.getAuthorityHolder().getAssociatedUser();
-    return myResponsibility.canManageBuilds()
+    return myResponsibility.canProcessUserDataModificationRequests()
             && user != null
             && user.isPermissionGrantedGlobally(Permission.ENABLE_DISABLE_AGENT);
   }
