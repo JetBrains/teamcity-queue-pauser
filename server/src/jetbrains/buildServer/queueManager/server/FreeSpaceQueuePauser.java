@@ -116,7 +116,7 @@ public class FreeSpaceQueuePauser {
   }
 
   private boolean isEnabled() {
-    return TeamCityProperties.getBooleanOrTrue(KEY_AUTO_PAUSE) && myResponsibility.canManageBuilds();
+    return TeamCityProperties.getBooleanOrTrue(KEY_AUTO_PAUSE) && myResponsibility.canProcessUserDataModificationRequests();
   }
 
   boolean isAutoResumingEnabled() {

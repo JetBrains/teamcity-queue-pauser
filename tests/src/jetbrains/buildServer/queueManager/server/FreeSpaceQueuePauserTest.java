@@ -110,7 +110,7 @@ public class FreeSpaceQueuePauserTest extends BaseTestCase {
       allowing(myDiskSpaceWatcher).getDirsNoSpace();
       will(returnValue(Collections.emptyMap()));
 
-      allowing(myResponsibility).canManageBuilds();
+      allowing(myResponsibility).canProcessUserDataModificationRequests();
       will(returnValue(true));
     }});
     invoke();
@@ -131,7 +131,7 @@ public class FreeSpaceQueuePauserTest extends BaseTestCase {
       allowing(myDiskSpaceWatcher).getDirsNoSpace();
       will(returnValue(Collections.emptyMap()));
 
-      allowing(myResponsibility).canManageBuilds();
+      allowing(myResponsibility).canProcessUserDataModificationRequests();
       will(returnValue(true));
     }});
     invoke();
@@ -179,7 +179,7 @@ public class FreeSpaceQueuePauserTest extends BaseTestCase {
       oneOf(myDiskSpaceWatcher).getDirsNoSpace();
       will(returnValue(paths));
 
-      allowing(myResponsibility).canManageBuilds();
+      allowing(myResponsibility).canProcessUserDataModificationRequests();
       will(returnValue(true));
     }});
   }
@@ -211,7 +211,7 @@ public class FreeSpaceQueuePauserTest extends BaseTestCase {
       oneOf(myDiskSpaceWatcher).getDirsNoSpace();
       will(returnValue(Collections.emptyMap()));
 
-      allowing(myResponsibility).canManageBuilds();
+      allowing(myResponsibility).canProcessUserDataModificationRequests();
       will(returnValue(true));
 
     }});
@@ -241,7 +241,7 @@ public class FreeSpaceQueuePauserTest extends BaseTestCase {
       oneOf(myQueueState).getActor();
       will(returnValue(Actor.FREE_SPACE_QUEUE_PAUSER));
 
-      allowing(myResponsibility).canManageBuilds();
+      allowing(myResponsibility).canProcessUserDataModificationRequests();
       will(returnValue(true));
 
       exactly(1).of(same(myQueueStateManager)).method("writeQueueState");
@@ -275,7 +275,7 @@ public class FreeSpaceQueuePauserTest extends BaseTestCase {
       oneOf(myQueueState).getActor();
       will(returnValue(Actor.USER));
 
-      allowing(myResponsibility).canManageBuilds();
+      allowing(myResponsibility).canProcessUserDataModificationRequests();
       will(returnValue(true));
 
     }});
