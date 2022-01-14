@@ -16,7 +16,6 @@
 
 package jetbrains.buildServer.queueManager.server;
 
-import jetbrains.buildServer.controllers.healthStatus.GlobalHealthItemsTracker;
 import jetbrains.buildServer.log.Loggers;
 import jetbrains.buildServer.queueManager.settings.Actor;
 import jetbrains.buildServer.queueManager.settings.QueueState;
@@ -26,6 +25,7 @@ import jetbrains.buildServer.serverSide.BuildServerListener;
 import jetbrains.buildServer.serverSide.ServerResponsibility;
 import jetbrains.buildServer.serverSide.TeamCityProperties;
 import jetbrains.buildServer.serverSide.impl.DiskSpaceWatcher;
+import jetbrains.buildServer.serverSide.healthStatus.GlobalHealthItemsTracker;
 import jetbrains.buildServer.util.Alarm;
 import jetbrains.buildServer.util.EventDispatcher;
 import org.jetbrains.annotations.NotNull;

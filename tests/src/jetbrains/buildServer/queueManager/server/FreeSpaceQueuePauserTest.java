@@ -17,7 +17,7 @@
 package jetbrains.buildServer.queueManager.server;
 
 import jetbrains.buildServer.BaseTestCase;
-import jetbrains.buildServer.controllers.healthStatus.GlobalHealthItemsTracker;
+import jetbrains.buildServer.serverSide.healthStatus.GlobalHealthItemsTracker;
 import jetbrains.buildServer.queueManager.settings.Actor;
 import jetbrains.buildServer.queueManager.settings.QueueState;
 import jetbrains.buildServer.queueManager.settings.QueueStateManager;

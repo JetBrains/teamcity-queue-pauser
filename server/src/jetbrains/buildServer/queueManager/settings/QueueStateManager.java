@@ -18,10 +18,10 @@ package jetbrains.buildServer.queueManager.settings;
 
 import com.intellij.openapi.diagnostic.Logger;
 import jetbrains.buildServer.configuration.FileWatcher;
-import jetbrains.buildServer.controllers.healthStatus.GlobalHealthItemsTracker;
 import jetbrains.buildServer.serverSide.ServerPaths;
 import jetbrains.buildServer.serverSide.impl.FileWatcherFactory;
 import jetbrains.buildServer.serverSide.impl.persisting.SettingsPersister;
+import jetbrains.buildServer.serverSide.healthStatus.GlobalHealthItemsTracker;
 import jetbrains.buildServer.users.SUser;
 import jetbrains.buildServer.users.UserModel;
 import jetbrains.buildServer.util.Dates;

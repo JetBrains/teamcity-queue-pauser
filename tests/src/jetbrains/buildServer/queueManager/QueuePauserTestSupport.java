@@ -19,7 +19,7 @@ package jetbrains.buildServer.queueManager;
 import jetbrains.BuildServerCreator;
 import jetbrains.buildServer.MockTimeService;
 import jetbrains.buildServer.configuration.FileWatcher;
-import jetbrains.buildServer.controllers.healthStatus.GlobalHealthItemsTracker;
+import jetbrains.buildServer.serverSide.healthStatus.GlobalHealthItemsTracker;
 import jetbrains.buildServer.queueManager.server.FreeSpaceQueuePauser;
 import jetbrains.buildServer.queueManager.server.QueuePausePrecondition;
 import jetbrains.buildServer.queueManager.settings.QueueStateManager;
@@ -43,10 +43,6 @@ public class QueuePauserTestSupport {
     GlobalHealthItemsTracker tracker = new GlobalHealthItemsTracker() {
       @Override
       public void recalculate() {
-      }
-
-      @Override
-      public void clearCache() {
       }
     };
 
