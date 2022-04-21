@@ -52,6 +52,7 @@ public class QueueStateManager {
   private static final Logger LOG = Logger.getInstance(QueueStateManager.class.getName());
 
   private static final String FILENAME = "plugin.queue-pauser.xml";
+  private static final String SYSTEM_PROPERTY = "teamcity.plugin.queuePauser.queue.enabled";
 
   interface FIELDS {
     String QUEUE_ENABLED = "queue-enabled";
@@ -123,7 +124,12 @@ public class QueueStateManager {
     } catch (IOException e) {
       LOG.warnAndDebugDetails("Failed to save queue state into file \"" + myConfigFile.getAbsolutePath() + "\"", e);
     }
+    setSystemProperty(properties.get(FIELDS.QUEUE_ENABLED));
     myGlobalHealthItemsTracker.recalculate();
+  }
+
+  private void setSystemProperty(String notificationsEnabled) {
+    System.setProperty(SYSTEM_PROPERTY, notificationsEnabled);
   }
 
   private void doLoad() {
@@ -149,6 +155,7 @@ public class QueueStateManager {
       }
     });
     myStateRef.set(from(result));
+    setSystemProperty(result.get(FIELDS.QUEUE_ENABLED));
     myGlobalHealthItemsTracker.recalculate();
   }
 
