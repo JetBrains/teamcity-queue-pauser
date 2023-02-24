@@ -61,7 +61,6 @@ public class QueuePauserTestSupport {
     DiskSpaceWatcher watcher = new DiskSpaceWatcher(fixture.getServerPaths(),
             fixture.getServerSettings(), fixture.getSingletonService(ExecutorServices.class),
             new MockTimeService(),
-            fixture.getServerResponsibility(),
             fixture.getEventDispatcher());
 
     FreeSpaceQueuePauser freeSpaceQueuePauser = new FreeSpaceQueuePauser(fixture.getEventDispatcher(),
