@@ -6,7 +6,7 @@ import com.intellij.openapi.diagnostic.Logger;
 import jetbrains.buildServer.configuration.FileWatcher;
 import jetbrains.buildServer.serverSide.ServerPaths;
 import jetbrains.buildServer.serverSide.impl.FileWatcherFactory;
-import jetbrains.buildServer.serverSide.impl.persisting.SettingsPersister;
+import jetbrains.buildServer.serverSide.SettingsPersister;
 import jetbrains.buildServer.serverSide.healthStatus.GlobalHealthItemsTracker;
 import jetbrains.buildServer.users.SUser;
 import jetbrains.buildServer.users.UserModel;
