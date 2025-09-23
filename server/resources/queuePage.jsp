@@ -77,7 +77,7 @@
           onCompleteSave: function(form, responseXML, err) {
             if (${isSakuraPlugin}) {
               // for some reason, wait reasons don't update right away, therefore the delay
-              setTimeout(() => ReactUI.updateQueue(), 500);
+              setTimeout(() => ReactUIPromise.then(ReactUI => ReactUI.updateQueue()), 500);
               var container = document.getElementById('pause-build-queue');
               if (container != null) {
                 container.refresh();
